@@ -18,6 +18,8 @@ def is_admin(request):
 def categories_list_create(request):
     if request.method == 'GET':
         categories = Category.objects.all()
+        if not is_admin(request):
+            categories = categories.filter(is_active=True)
         serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data)
     

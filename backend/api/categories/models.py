@@ -16,6 +16,7 @@ class Category(models.Model):
     image_url = models.TextField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     display_label = models.CharField(max_length=30, choices=DISPLAY_LABEL_CHOICES, default='for_everyone')
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         verbose_name_plural = "Categories"

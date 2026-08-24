@@ -29,7 +29,7 @@ const PackagesPage = ({
   const allCategoryPills = ['ALL'];
   if (Array.isArray(categories) && categories.length > 0) {
     categories.forEach(cat => {
-      if (cat && cat.name) {
+      if (cat && cat.name && cat.is_active !== false) {
         const uppercaseName = String(cat.name).toUpperCase();
         if (!allCategoryPills.includes(uppercaseName)) {
           allCategoryPills.push(uppercaseName);

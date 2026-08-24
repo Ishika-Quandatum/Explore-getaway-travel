@@ -72,6 +72,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
   const [catImg, setCatImg] = useState('');
   const [catDesc, setCatDesc] = useState('');
   const [catDisplayLabel, setCatDisplayLabel] = useState('for_everyone');
+  const [catActive, setCatActive] = useState(true);
 
   // Destination Modal Form State
   const [showDestinationModal, setShowDestinationModal] = useState(false);
@@ -399,6 +400,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     setCatImg('');
     setCatDesc('');
     setCatDisplayLabel('for_everyone');
+    setCatActive(true);
     setCatFileName('');
   };
 
@@ -409,6 +411,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     setCatImg(c.image_url || '');
     setCatDesc(c.description || '');
     setCatDisplayLabel(c.display_label || 'for_everyone');
+    setCatActive(c.is_active !== undefined ? c.is_active : true);
     setShowCategoryModal(true);
   };
 
@@ -420,6 +423,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
       image_url: catImg,
       description: catDesc,
       display_label: catDisplayLabel,
+      is_active: catActive,
     };
     try {
       if (editingCategoryId) {
@@ -429,7 +433,8 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
       }
       setShowCategoryModal(false);
       resetCategoryForm();
-      fetchAdminData();
+      await fetchAdminData();
+      if (onRefreshData) onRefreshData();
     } catch (err) {
       console.error('Failed to save category:', err);
       alert('Failed to save category. Ensure all fields are valid.');
@@ -1040,12 +1045,13 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                     <th className="p-4">Image</th>
                     <th className="p-4">Name</th>
                     <th className="p-4">Description</th>
+                    <th className="p-4">Status</th>
                     <th className="p-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
                   {categories.length === 0 ? (
-                    <tr><td colSpan="4" className="p-8 text-center text-slate-500">No categories added yet.</td></tr>
+                    <tr><td colSpan="5" className="p-8 text-center text-slate-500">No categories added yet.</td></tr>
                   ) : categories.map((cat) => (
                     <tr key={cat.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-4">
@@ -1061,6 +1067,28 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                         {cat.name}
                       </td>
                       <td className="p-4 max-w-[250px] truncate text-slate-500">{cat.description || '—'}</td>
+                      <td className="p-4">
+                        <button
+                          onClick={async () => {
+                            try {
+                              await api.patch(`categories/${cat.id}/`, { is_active: !(cat.is_active !== false) });
+                              await fetchAdminData();
+                              if (onRefreshData) onRefreshData();
+                            } catch (err) {
+                              alert('Failed to update category status.');
+                            }
+                          }}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold transition-colors border cursor-pointer ${
+                            cat.is_active !== false
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                              : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                          }`}
+                          title="Click to activate/deactivate category"
+                        >
+                          <span className={`w-2 h-2 rounded-full ${cat.is_active !== false ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                          {cat.is_active !== false ? 'Active' : 'Inactive'}
+                        </button>
+                      </td>
                       <td className="p-4 text-right space-x-2">
                         <button onClick={() => openEditCategory(cat)} className="p-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-600 border border-sky-100 transition-colors">
                           <Edit className="w-4 h-4" />
@@ -1714,6 +1742,27 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                   <option value="for_couples">For Couples</option>
                   <option value="for_relaxation">For Relaxation</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-bold mb-2">Status (Frontend Visibility)</label>
+                <button
+                  type="button"
+                  onClick={() => setCatActive(!catActive)}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-bold transition-colors cursor-pointer w-full justify-between ${
+                    catActive
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                      : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    {catActive ? <ToggleRight className="w-5 h-5 text-emerald-600" /> : <ToggleLeft className="w-5 h-5 text-rose-500" />}
+                    {catActive ? 'Active (Shown in Frontend)' : 'Inactive (Hidden from Frontend)'}
+                  </span>
+                  <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-extrabold ${catActive ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
+                    {catActive ? 'Active' : 'Inactive'}
+                  </span>
+                </button>
               </div>
 
               <button

@@ -7,14 +7,15 @@ const CuratedCollections = ({ categories = [], onFilterCategory }) => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const autoPlayRef = useRef(null);
 
+  const activeCategories = categories.filter(c => c.is_active !== false);
   const cardsPerSlide = 2;
-  const totalSlides = Math.ceil(categories.length / cardsPerSlide);
+  const totalSlides = Math.ceil(activeCategories.length / cardsPerSlide);
   const hasCarousel = totalSlides > 1;
 
   // Build slides: chunk categories into groups of 2
   const slides = [];
-  for (let i = 0; i < categories.length; i += cardsPerSlide) {
-    slides.push(categories.slice(i, i + cardsPerSlide));
+  for (let i = 0; i < activeCategories.length; i += cardsPerSlide) {
+    slides.push(activeCategories.slice(i, i + cardsPerSlide));
   }
 
   const goTo = useCallback((idx) => {

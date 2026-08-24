@@ -6,7 +6,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ('id', 'name', 'slug', 'image_url', 'description', 'display_label', 'display_label_text')
+        fields = ('id', 'name', 'slug', 'image_url', 'description', 'display_label', 'display_label_text', 'is_active')
 
     def get_display_label_text(self, obj):
         return obj.get_display_label_display()
