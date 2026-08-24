@@ -177,27 +177,27 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     const payload = {
       title: pkgTitle,
       slug: pkgSlug || pkgTitle.toLowerCase().replace(/\s+/g, '-'),
-      destination: pkgDest,
-      category: pkgCat,
+      destination: pkgDest ? Number(pkgDest) : null,
+      category: pkgCat ? Number(pkgCat) : null,
       duration_nights: Number(pkgNights),
       duration_days: Number(pkgDays),
       location_summary: pkgLocation,
       price_per_person: Number(pkgPrice),
-      old_price: pkgOldPrice ? Number(pkgOldPrice) : null,
-      double_sharing: pkgDoubleSharing ? Number(pkgDoubleSharing) : null,
-      triple_sharing: pkgTripleSharing ? Number(pkgTripleSharing) : null,
+      old_price: pkgOldPrice !== '' && pkgOldPrice !== null ? Number(pkgOldPrice) : null,
+      double_sharing: pkgDoubleSharing !== '' && pkgDoubleSharing !== null ? Number(pkgDoubleSharing) : null,
+      triple_sharing: pkgTripleSharing !== '' && pkgTripleSharing !== null ? Number(pkgTripleSharing) : null,
       badge_text: pkgBadge,
       image_url: pkgImg,
       tour_overview: pkgOverview,
       cancellation_policy: pkgCancellation,
-      upcoming_departures: pkgDepartures.split(',').map(s => s.trim()).filter(Boolean),
+      upcoming_departures: typeof pkgDepartures === 'string' ? pkgDepartures.split(',').map(s => s.trim()).filter(Boolean) : (Array.isArray(pkgDepartures) ? pkgDepartures : []),
       gallery: pkgGallery.map(item => ({ url: item.url, description: item.description || '' })),
       day_wise_itinerary: formattedItinerary,
-      rating: pkgRating ? Number(pkgRating) : 4.5,
+      rating: pkgRating !== '' && pkgRating !== null ? Number(pkgRating) : 4.5,
       reviews_count: 50,
       highlights: ['Curated sightseeing', 'Comfortable stays', 'Dedicated driver'],
-      inclusions: pkgInclusions ? pkgInclusions.split(',').map(s => s.trim()).filter(Boolean) : ['Hotels', 'Breakfast', 'Transfers'],
-      exclusions: pkgExclusions ? pkgExclusions.split(',').map(s => s.trim()).filter(Boolean) : ['Personal expenses'],
+      inclusions: typeof pkgInclusions === 'string' ? pkgInclusions.split(',').map(s => s.trim()).filter(Boolean) : (Array.isArray(pkgInclusions) ? pkgInclusions : ['Hotels', 'Breakfast', 'Transfers']),
+      exclusions: typeof pkgExclusions === 'string' ? pkgExclusions.split(',').map(s => s.trim()).filter(Boolean) : (Array.isArray(pkgExclusions) ? pkgExclusions : ['Personal expenses']),
     };
 
     try {
@@ -208,7 +208,10 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
       }
       setShowPackageModal(false);
       resetPackageForm();
-      fetchAdminData();
+      await fetchAdminData();
+      if (onRefreshData) {
+        onRefreshData();
+      }
     } catch (err) {
       console.error('Failed to save package:', err);
       alert('Failed to save package. Ensure all fields are valid.');
@@ -229,8 +232,8 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     setEditingPackageId(null);
     setPkgTitle('');
     setPkgSlug('');
-    setPkgDest('');
-    setPkgCat('');
+    setPkgDest(destinations.length > 0 ? destinations[0].id : '');
+    setPkgCat(categories.length > 0 ? categories[0].id : '');
     setPkgNights('');
     setPkgDays('');
     setPkgLocation('');
@@ -238,7 +241,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     setPkgOldPrice('');
     setPkgDoubleSharing('');
     setPkgTripleSharing('');
-    setPkgBadge('BEST SELLER');
+    setPkgBadge('POPULAR');
     setPkgRating('');
     setPkgFileName('');
     setGalleryFileNames('');
@@ -253,27 +256,36 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
 
   const openEditPackage = (pkg) => {
     setEditingPackageId(pkg.id);
-    setPkgTitle(pkg.title);
-    setPkgSlug(pkg.slug);
-    setPkgDest(pkg.destination);
-    setPkgCat(pkg.category);
-    setPkgNights(pkg.duration_nights);
-    setPkgDays(pkg.duration_days);
-    setPkgLocation(pkg.location_summary);
-    setPkgPrice(pkg.price_per_person);
+    setPkgTitle(pkg.title || '');
+    setPkgSlug(pkg.slug || '');
+
+    const destVal = typeof pkg.destination === 'object'
+      ? pkg.destination?.id
+      : (pkg.destination || pkg.destination_details?.id || (destinations.length > 0 ? destinations[0].id : ''));
+    setPkgDest(destVal);
+
+    const catVal = typeof pkg.category === 'object'
+      ? pkg.category?.id
+      : (pkg.category || pkg.category_details?.id || (categories.length > 0 ? categories[0].id : ''));
+    setPkgCat(catVal);
+
+    setPkgNights(pkg.duration_nights || 1);
+    setPkgDays(pkg.duration_days || 2);
+    setPkgLocation(pkg.location_summary || '');
+    setPkgPrice(pkg.price_per_person || '');
     setPkgOldPrice(pkg.old_price !== undefined && pkg.old_price !== null ? pkg.old_price : '');
     setPkgDoubleSharing(pkg.double_sharing !== undefined && pkg.double_sharing !== null ? pkg.double_sharing : '');
     setPkgTripleSharing(pkg.triple_sharing !== undefined && pkg.triple_sharing !== null ? pkg.triple_sharing : '');
-    setPkgBadge(pkg.badge_text || 'BEST SELLER');
+    setPkgBadge(pkg.badge_text || 'POPULAR');
     setPkgRating(pkg.rating !== undefined && pkg.rating !== null ? pkg.rating : '');
-    setPkgImg(pkg.image_url);
+    setPkgImg(pkg.image_url || '');
     setPkgOverview(pkg.tour_overview || '');
     setPkgCancellation(pkg.cancellation_policy || '');
-    setPkgDepartures(pkg.upcoming_departures?.join(', ') || '');
-    setPkgInclusions(pkg.inclusions?.join(', ') || '');
-    setPkgExclusions(pkg.exclusions?.join(', ') || '');
+    setPkgDepartures(Array.isArray(pkg.upcoming_departures) ? pkg.upcoming_departures.join(', ') : (pkg.upcoming_departures || ''));
+    setPkgInclusions(Array.isArray(pkg.inclusions) ? pkg.inclusions.join(', ') : (pkg.inclusions || ''));
+    setPkgExclusions(Array.isArray(pkg.exclusions) ? pkg.exclusions.join(', ') : (pkg.exclusions || ''));
     setPkgGallery((pkg.gallery || []).map(item => typeof item === 'string' ? { url: item, description: '' } : { url: item.url, description: item.description || '' }));
-    setPkgItinerary(pkg.day_wise_itinerary?.length > 0 ? pkg.day_wise_itinerary : [{ day_number: 1, title: '', description: '' }]);
+    setPkgItinerary(Array.isArray(pkg.day_wise_itinerary) && pkg.day_wise_itinerary.length > 0 ? pkg.day_wise_itinerary : [{ day_number: 1, title: '', description: '' }]);
     setShowPackageModal(true);
   };
 
@@ -781,10 +793,12 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                           <div className="text-[10px] text-slate-500 font-normal">{pkg.location_summary}</div>
                         </div>
                       </td>
-                      <td className="p-4 font-medium text-slate-700">{pkg.destination_details?.name || 'N/A'}</td>
+                      <td className="p-4 font-medium text-slate-700">
+                        {pkg.destination_details?.name || (typeof pkg.destination === 'object' ? pkg.destination?.name : '') || (destinations.find(d => String(d.id) === String(pkg.destination))?.name) || 'N/A'}
+                      </td>
                       <td className="p-4 font-medium">
                         <span className="px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-100 text-[10px] font-semibold">
-                          {pkg.category_details?.name || 'N/A'}
+                          {pkg.category_details?.name || (typeof pkg.category === 'object' ? pkg.category?.name : '') || (categories.find(c => String(c.id) === String(pkg.category))?.name) || 'N/A'}
                         </span>
                       </td>
                       <td className="p-4 text-slate-700">{pkg.duration_nights}N / {pkg.duration_days}D</td>
@@ -1044,14 +1058,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                         )}
                       </td>
                       <td className="p-4 font-bold text-slate-900">
-                        <div className="flex items-center gap-2">
-                          {cat.name}
-                          {cat.display_label_text && (
-                            <span className="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 text-[9px] font-extrabold uppercase tracking-wider">
-                              {cat.display_label_text}
-                            </span>
-                          )}
-                        </div>
+                        {cat.name}
                       </td>
                       <td className="p-4 max-w-[250px] truncate text-slate-500">{cat.description || '—'}</td>
                       <td className="p-4 text-right space-x-2">

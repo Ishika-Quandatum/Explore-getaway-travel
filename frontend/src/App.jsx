@@ -18,6 +18,7 @@ import UserPanel from './components/UserPanel';
 import AdminPanel from './components/AdminPanel';
 import ContactPage from './components/ContactPage';
 import DestinationsPage from './components/DestinationsPage';
+import PackagesPage from './components/PackagesPage';
 import { CheckCircle2, ShieldAlert } from 'lucide-react';
 
 const MainApp = () => {
@@ -137,11 +138,8 @@ const MainApp = () => {
   const handleFilterCategory = (catName) => {
     setActiveCategory(catName);
     setSearchQuery('');
-    setCurrentView('home');
-    const el = document.getElementById('packages-section');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+    setCurrentView('packages');
+    window.scrollTo(0, 0);
   };
 
   const handleBookingSuccess = (newBooking) => {
@@ -301,6 +299,23 @@ const MainApp = () => {
         {/* VIEW 5: CONTACT PAGE */}
         {currentView === 'contact' && (
           <ContactPage onGoBack={() => setCurrentView('home')} />
+        )}
+
+        {/* VIEW 5.2: PACKAGES LISTING PAGE */}
+        {currentView === 'packages' && (
+          <PackagesPage
+            packages={packages}
+            categories={categories}
+            destinations={destinations}
+            selectedCategory={activeCategory}
+            onSelectCategory={setActiveCategory}
+            onSelectPackage={(pkg) => {
+              setSelectedPackage(pkg);
+              setCurrentView('package-details');
+            }}
+            wishlist={wishlist.map(w => w.id)}
+            onWishlistToggle={handleWishlistToggle}
+          />
         )}
 
         {/* VIEW 5.5: DESTINATIONS PAGE */}

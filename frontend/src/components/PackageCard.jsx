@@ -33,7 +33,7 @@ const PackageCard = ({ packageItem, onSelectPackage, isWishlisted, onWishlistTog
     }
   };
 
-  const badgeText = packageItem.badge_text || 'BEST SELLER';
+  const badgeText = packageItem.badge_text || 'POPULAR';
 
   return (
     <div

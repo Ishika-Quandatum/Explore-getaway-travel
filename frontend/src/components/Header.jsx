@@ -12,23 +12,25 @@ const Header = ({ onOpenAuth, activeSection, setActiveSection, currentView, setC
     setCurrentView(view);
     setActiveSection(section);
     setMobileMenuOpen(false);
+    window.scrollTo(0, 0);
 
-    // Wait for the view to switch to home before scrolling
-    setTimeout(() => {
-      if (section === 'packages' || section === 'Honeymoon' || section === 'Group Tours') {
-        const el = document.getElementById('packages');
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth' });
+    if (view === 'home') {
+      setTimeout(() => {
+        if (section === 'packages') {
+          const el = document.getElementById('packages');
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+          }
+        } else if (section === 'blog') {
+          const el = document.getElementById('blog-section');
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+          }
+        } else if (section === 'all') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-      } else if (section === 'blog') {
-        const el = document.getElementById('blog-section');
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth' });
-        }
-      } else if (section === 'all' && view === 'home') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }, 100);
+      }, 100);
+    }
   };
 
   return (
@@ -79,15 +81,15 @@ const Header = ({ onOpenAuth, activeSection, setActiveSection, currentView, setC
             </button>
 
             <button
-              onClick={() => handleNavClick('packages', 'home')}
+              onClick={() => handleNavClick('ALL', 'packages')}
               className={`py-2 transition-all relative ${
-                currentView === 'home' && activeSection === 'packages'
+                currentView === 'packages'
                   ? 'text-white font-semibold'
                   : 'text-slate-300 hover:text-white'
               }`}
             >
               Packages
-              {currentView === 'home' && activeSection === 'packages' && (
+              {currentView === 'packages' && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full" />
               )}
             </button>
@@ -111,29 +113,29 @@ const Header = ({ onOpenAuth, activeSection, setActiveSection, currentView, setC
             </button>
 
             <button
-              onClick={() => handleNavClick('Honeymoon', 'home')}
+              onClick={() => handleNavClick('Honeymoon', 'packages')}
               className={`py-2 transition-all relative ${
-                activeSection === 'Honeymoon'
-                  ? 'text-white font-semibold'
+                currentView === 'packages' && activeSection.toUpperCase() === 'HONEYMOON'
+                  ? 'text-amber-400 font-semibold'
                   : 'text-slate-300 hover:text-white'
               }`}
             >
               Honeymoon
-              {activeSection === 'Honeymoon' && (
+              {currentView === 'packages' && activeSection.toUpperCase() === 'HONEYMOON' && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full" />
               )}
             </button>
 
             <button
-              onClick={() => handleNavClick('Group Tours', 'home')}
+              onClick={() => handleNavClick('Group Tours', 'packages')}
               className={`py-2 transition-all relative ${
-                activeSection === 'Group Tours'
-                  ? 'text-white font-semibold'
+                currentView === 'packages' && activeSection.toUpperCase() === 'GROUP TOURS'
+                  ? 'text-amber-400 font-semibold'
                   : 'text-slate-300 hover:text-white'
               }`}
             >
               Group Tours
-              {activeSection === 'Group Tours' && (
+              {currentView === 'packages' && activeSection.toUpperCase() === 'GROUP TOURS' && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full" />
               )}
             </button>
@@ -310,7 +312,7 @@ const Header = ({ onOpenAuth, activeSection, setActiveSection, currentView, setC
             Home
           </button>
           <button
-            onClick={() => handleNavClick('packages', 'home')}
+            onClick={() => handleNavClick('ALL', 'packages')}
             className="w-full text-left px-3 py-2 text-slate-200 hover:text-amber-400 text-sm font-medium"
           >
             Packages
@@ -326,13 +328,13 @@ const Header = ({ onOpenAuth, activeSection, setActiveSection, currentView, setC
             Destinations
           </button>
           <button
-            onClick={() => handleNavClick('Honeymoon', 'home')}
+            onClick={() => handleNavClick('Honeymoon', 'packages')}
             className="w-full text-left px-3 py-2 text-slate-200 hover:text-amber-400 text-sm font-medium"
           >
             Honeymoon
           </button>
           <button
-            onClick={() => handleNavClick('Group Tours', 'home')}
+            onClick={() => handleNavClick('Group Tours', 'packages')}
             className="w-full text-left px-3 py-2 text-slate-200 hover:text-amber-400 text-sm font-medium"
           >
             Group Tours
