@@ -1,0 +1,60 @@
+# ==========================================
+# Environment Variables & Secrets
+# ==========================================
+.env
+.env.local
+.env.*.local
+*.env
+
+# ==========================================
+# Operating System & IDE Files
+# ==========================================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ==========================================
+# Node / Frontend (React + Vite)
+# ==========================================
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+dist-ssr/
+frontend/dist-ssr/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ==========================================
+# Python / Django Backend
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environment / Virtualenv
+.venv/
+venv/
+ENV/
+env/
+
+# Django local database & media uploads
+*.sqlite3
+backend/db.sqlite3
+media/
+backend/media/
+
+# Testing & Coverage
+.coverage
+htmlcov/
+.pytest_cache/
