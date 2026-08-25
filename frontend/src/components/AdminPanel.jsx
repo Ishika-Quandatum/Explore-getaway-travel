@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import api, { getImageUrl } from '../api/axios';
 import { ShieldCheck, Package, ShoppingBag, Tag, Layers, DollarSign, Plus, Trash2, Edit, CheckCircle, Clock, XCircle, ArrowLeft, RefreshCw, BookOpen, X, ToggleLeft, ToggleRight, ChevronDown, ChevronLeft, ChevronRight, Calendar, ArrowRight, Activity, CreditCard, AlignLeft, Percent, Search } from 'lucide-react';
 
@@ -68,6 +69,13 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
 
   const [blogErrors, setBlogErrors] = useState({});
   const blogFormRef = useRef(null);
+
+  // Custom Confirm Dialog State
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, title: '', message: '', onConfirm: null });
+  const showConfirmDialog = (title, message, onConfirm) => {
+    setConfirmDialog({ open: true, title, message, onConfirm });
+  };
+  const closeConfirmDialog = () => setConfirmDialog({ open: false, title: '', message: '', onConfirm: null });
 
   // Coupon Modal Form State
   const [showCouponModal, setShowCouponModal] = useState(false);
@@ -419,14 +427,20 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     }
   };
 
-  const handleDeletePackage = async (id) => {
-    if (!window.confirm('Delete this tour package permanently?')) return;
-    try {
-      await api.delete(`packages/${id}/`);
-      fetchAdminData();
-    } catch (err) {
-      alert('Failed to delete package.');
-    }
+  const handleDeletePackage = (id) => {
+    showConfirmDialog(
+      'Delete Tour Package',
+      'Are you sure you want to delete this tour package permanently? This action cannot be undone.',
+      async () => {
+        try {
+          await api.delete(`packages/${id}/`);
+          fetchAdminData();
+        } catch (err) {
+          alert('Failed to delete package.');
+        }
+        closeConfirmDialog();
+      }
+    );
   };
 
   const resetPackageForm = () => {
@@ -612,14 +626,20 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     }
   };
 
-  const handleDeleteCoupon = async (id) => {
-    if (!window.confirm('Delete this coupon permanently?')) return;
-    try {
-      await api.delete(`coupons/${id}/`);
-      fetchAdminData();
-    } catch (err) {
-      alert('Failed to delete coupon.');
-    }
+  const handleDeleteCoupon = (id) => {
+    showConfirmDialog(
+      'Delete Coupon',
+      'Are you sure you want to delete this coupon permanently? This action cannot be undone.',
+      async () => {
+        try {
+          await api.delete(`coupons/${id}/`);
+          fetchAdminData();
+        } catch (err) {
+          alert('Failed to delete coupon.');
+        }
+        closeConfirmDialog();
+      }
+    );
   };
 
   // ---- CATEGORY CRUD ----
@@ -698,14 +718,20 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     }
   };
 
-  const handleDeleteCategory = async (id) => {
-    if (!window.confirm('Delete this category permanently?')) return;
-    try {
-      await api.delete(`categories/${id}/`);
-      fetchAdminData();
-    } catch (err) {
-      alert('Failed to delete category.');
-    }
+  const handleDeleteCategory = (id) => {
+    showConfirmDialog(
+      'Delete Category',
+      'Are you sure you want to delete this category permanently? This action cannot be undone.',
+      async () => {
+        try {
+          await api.delete(`categories/${id}/`);
+          fetchAdminData();
+        } catch (err) {
+          alert('Failed to delete category.');
+        }
+        closeConfirmDialog();
+      }
+    );
   };
 
   // ---- DESTINATION CRUD ----
@@ -783,14 +809,20 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     }
   };
 
-  const handleDeleteDestination = async (id) => {
-    if (!window.confirm('Delete this destination permanently?')) return;
-    try {
-      await api.delete(`destinations/${id}/`);
-      fetchAdminData();
-    } catch (err) {
-      alert('Failed to delete destination.');
-    }
+  const handleDeleteDestination = (id) => {
+    showConfirmDialog(
+      'Delete Destination',
+      'Are you sure you want to delete this destination permanently? This action cannot be undone.',
+      async () => {
+        try {
+          await api.delete(`destinations/${id}/`);
+          fetchAdminData();
+        } catch (err) {
+          alert('Failed to delete destination.');
+        }
+        closeConfirmDialog();
+      }
+    );
   };
 
   // ---- BLOG CRUD ----
@@ -871,14 +903,20 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     }
   };
 
-  const handleDeleteBlog = async (id) => {
-    if (!window.confirm('Delete this blog post permanently?')) return;
-    try {
-      await api.delete(`blogs/${id}/`);
-      fetchAdminData();
-    } catch (err) {
-      alert('Failed to delete blog.');
-    }
+  const handleDeleteBlog = (id) => {
+    showConfirmDialog(
+      'Delete Blog Article',
+      'Are you sure you want to delete this blog article permanently? This action cannot be undone.',
+      async () => {
+        try {
+          await api.delete(`blogs/${id}/`);
+          fetchAdminData();
+        } catch (err) {
+          alert('Failed to delete blog.');
+        }
+        closeConfirmDialog();
+      }
+    );
   };
 
   return (
@@ -2697,6 +2735,43 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Custom Confirm Dialog - rendered via portal to always be viewport-centered */}
+      {confirmDialog.open && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-fade-in" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+            {/* Header */}
+            <div className="bg-amber-50 px-6 py-4 border-b border-amber-100 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                <Trash2 className="w-5 h-5 text-amber-600" />
+              </div>
+              <h3 className="text-lg font-extrabold text-slate-900">{confirmDialog.title}</h3>
+            </div>
+
+            {/* Body */}
+            <div className="px-6 py-5">
+              <p className="text-sm text-slate-600 leading-relaxed">{confirmDialog.message}</p>
+            </div>
+
+            {/* Actions */}
+            <div className="px-6 pb-5 flex items-center justify-end gap-3">
+              <button
+                onClick={closeConfirmDialog}
+                className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-bold hover:bg-slate-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDialog.onConfirm}
+                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold transition-colors shadow-lg shadow-amber-500/20"
+              >
+                Confirm Delete
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
 
     </div>
