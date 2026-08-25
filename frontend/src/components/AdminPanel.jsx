@@ -154,18 +154,33 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     if (packagePage > maxPage) setPackagePage(maxPage);
   }, [filteredPackages.length, packagePage]);
 
-  // Booking Pagination State
+  // Booking Pagination & Search State
+  const [bookingSearchQuery, setBookingSearchQuery] = useState('');
   const [bookingPage, setBookingPage] = useState(1);
-  const bookingsPerPage = 5;
-  const totalBookingPages = Math.ceil(bookings.length / bookingsPerPage) || 1;
+  const bookingsPerPage = 10;
+
+  const filteredBookings = bookings.filter((booking) => {
+    if (!bookingSearchQuery.trim()) return true;
+    const query = bookingSearchQuery.toLowerCase().trim();
+    const nameMatch = booking.customer_name?.toLowerCase().includes(query);
+    const phoneMatch = booking.customer_phone?.toLowerCase().includes(query);
+    const codeMatch = booking.booking_code?.toLowerCase().includes(query);
+    return nameMatch || phoneMatch || codeMatch;
+  });
+
+  const totalBookingPages = Math.ceil(filteredBookings.length / bookingsPerPage) || 1;
   const bookingIndexOfLastItem = bookingPage * bookingsPerPage;
   const bookingIndexOfFirstItem = bookingIndexOfLastItem - bookingsPerPage;
-  const currentBookings = bookings.slice(bookingIndexOfFirstItem, bookingIndexOfLastItem);
+  const currentBookings = filteredBookings.slice(bookingIndexOfFirstItem, bookingIndexOfLastItem);
 
   useEffect(() => {
-    const maxPage = Math.ceil(bookings.length / bookingsPerPage) || 1;
+    setBookingPage(1);
+  }, [bookingSearchQuery]);
+
+  useEffect(() => {
+    const maxPage = Math.ceil(filteredBookings.length / bookingsPerPage) || 1;
     if (bookingPage > maxPage) setBookingPage(maxPage);
-  }, [bookings.length, bookingPage]);
+  }, [filteredBookings.length, bookingPage]);
 
   // Coupon Pagination & Search State
   const [couponSearchQuery, setCouponSearchQuery] = useState('');
@@ -1255,6 +1270,29 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
       {activeTab === 'bookings' && (
         <div className="space-y-6">
           <h2 className="text-lg font-bold text-slate-800">Customer Bookings Overview</h2>
+          
+          {/* Search Bookings Input */}
+          <div className="relative w-full max-w-md">
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search Booking by name or phone number or code "
+              value={bookingSearchQuery}
+              onChange={(e) => setBookingSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-9 py-2.5 bg-white text-slate-800 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all shadow-sm"
+            />
+            {bookingSearchQuery && (
+              <button
+                type="button"
+                onClick={() => setBookingSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100 transition-colors"
+                title="Clear search"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
           <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs text-slate-600">
@@ -1269,8 +1307,12 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  {bookings.length === 0 ? (
-                    <tr><td colSpan="6" className="p-8 text-center text-slate-500">No bookings made yet.</td></tr>
+                  {filteredBookings.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" className="p-8 text-center text-slate-500 font-medium">
+                        {bookingSearchQuery ? `No booking matches "${bookingSearchQuery}".` : 'No bookings made yet.'}
+                      </td>
+                    </tr>
                   ) : currentBookings.map((booking) => (
                     <tr key={booking.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-4 font-extrabold text-amber-600">{booking.booking_code}</td>
@@ -1302,7 +1344,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
             {/* Pagination controls at bottom-right of table */}
             <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
               <div className="text-xs text-slate-500 font-medium">
-                Showing <span className="font-semibold text-slate-800">{bookings.length > 0 ? bookingIndexOfFirstItem + 1 : 0}</span> to <span className="font-semibold text-slate-800">{Math.min(bookingIndexOfLastItem, bookings.length)}</span> of <span className="font-semibold text-slate-800">{bookings.length}</span> bookings
+                Showing <span className="font-semibold text-slate-800">{filteredBookings.length > 0 ? bookingIndexOfFirstItem + 1 : 0}</span> to <span className="font-semibold text-slate-800">{Math.min(bookingIndexOfLastItem, filteredBookings.length)}</span> of <span className="font-semibold text-slate-800">{filteredBookings.length}</span> bookings
               </div>
               <div className="flex items-center gap-2 ml-auto">
                 <button

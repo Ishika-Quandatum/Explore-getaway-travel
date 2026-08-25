@@ -143,11 +143,8 @@ const MainApp = () => {
   };
 
   const handleBookingSuccess = (newBooking) => {
-    setSelectedPackage(null);
-    setToastMsg(`Booking confirmed successfully! Code: ${newBooking.booking_code}`);
+    setToastMsg('Booked successfully and added to My Bookings.');
     setTimeout(() => setToastMsg(''), 5000);
-    setCurrentView('user');
-    window.scrollTo(0, 0);
   };
 
   const handleAuthSuccessRedirect = (userRole) => {

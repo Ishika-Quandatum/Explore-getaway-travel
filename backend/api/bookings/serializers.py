@@ -14,7 +14,10 @@ class BookingSerializer(serializers.ModelSerializer):
             'travel_date', 'guests_count', 'customer_name', 'customer_email', 'customer_phone',
             'total_price', 'special_requests', 'status', 'created_at'
         )
-        read_only_fields = ('id', 'booking_code', 'created_at')
+        read_only_fields = ('id', 'booking_code', 'user', 'created_at')
+        extra_kwargs = {
+            'customer_email': {'required': False, 'allow_blank': True},
+        }
 
 
 class WishlistSerializer(serializers.ModelSerializer):

@@ -17,7 +17,7 @@ class Booking(models.Model):
     travel_date = models.DateField()
     guests_count = models.PositiveIntegerField(default=1)
     customer_name = models.CharField(max_length=150)
-    customer_email = models.EmailField()
+    customer_email = models.EmailField(blank=True, default='')
     customer_phone = models.CharField(max_length=20)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     special_requests = models.TextField(blank=True, null=True)

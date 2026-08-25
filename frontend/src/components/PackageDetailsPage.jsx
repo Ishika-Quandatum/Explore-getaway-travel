@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   MapPin, Clock, Star, ChevronDown, ChevronUp, 
   Check, X, PhoneCall, ArrowLeft, ChevronRight,
-  Calendar
+  Calendar, AlertCircle
 } from 'lucide-react';
-import { getImageUrl } from '../api/axios';
+import api, { getImageUrl } from '../api/axios';
 
 export default function PackageDetailsPage({ packageItem, onGoBack, onBookingSuccess, onRequireAuth, isAuthenticated }) {
   const [activeTab, setActiveTab] = useState('overview');
@@ -19,6 +19,12 @@ export default function PackageDetailsPage({ packageItem, onGoBack, onBookingSuc
   const [inclusionsOpen, setInclusionsOpen] = useState(true);
   const [cancellationOpen, setCancellationOpen] = useState(true);
   const [exclusionsOpen, setExclusionsOpen] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
+
+  const dateRef = useRef(null);
+  const nameRef = useRef(null);
+  const mobileRef = useRef(null);
 
   const getGalleryItems = () => {
     const raw = packageItem.gallery || [];
@@ -69,24 +75,66 @@ export default function PackageDetailsPage({ packageItem, onGoBack, onBookingSuc
   
   const originalPrice = packageItem.original_price ? Number(packageItem.original_price) : currentPrice * 1.25;
 
-  const handleBook = () => {
+  const handleBook = async () => {
+    setFormErrors({});
     if (!isAuthenticated) {
       onRequireAuth();
       return;
     }
-    if (!customerName || !customerMobile) {
-      alert('Please provide your name and mobile number to proceed.');
+    
+    const errors = {};
+    if (!selectedDate) errors.date = 'Please select a travel date to proceed.';
+    if (!customerName) errors.name = 'Please provide your name.';
+    if (!customerMobile || customerMobile.length < 10) errors.mobile = 'Please enter a valid phone number.';
+    
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      
+      // Scroll to the first error
+      setTimeout(() => {
+        if (errors.date && dateRef.current) {
+          dateRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else if (errors.name && nameRef.current) {
+          nameRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else if (errors.mobile && mobileRef.current) {
+          mobileRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
       return;
     }
-    
-    // Mock successful booking
-    const bookingCode = 'BKG' + Math.floor(Math.random() * 90000 + 10000);
-    onBookingSuccess({ booking_code: bookingCode });
+
+    if (bookingLoading) return; // Prevent duplicate submissions
+
+    setBookingLoading(true);
+    try {
+      const payload = {
+        package: packageItem.id,
+        travel_date: selectedDate,
+        guests_count: adults + children,
+        customer_name: customerName,
+        customer_phone: customerMobile,
+        total_price: totalPrice,
+      };
+      const res = await api.post('bookings/', payload);
+      onBookingSuccess(res.data);
+      
+      // Reset form fields
+      setSelectedDate('');
+      setCustomerName('');
+      setCustomerMobile('');
+      setAdults(2);
+      setChildren(0);
+      setSharingType('single');
+    } catch (err) {
+      console.error('Booking failed:', err);
+      setFormErrors({ general: 'Booking failed. Please try again.' });
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   return (
     <div className="bg-slate-50 min-h-screen pb-20">
-      
       {/* Hero Banner Section */}
       <div className="relative h-[450px] md:h-[550px] w-full">
         {/* Background Image with Overlay */}
@@ -414,17 +462,28 @@ export default function PackageDetailsPage({ packageItem, onGoBack, onBookingSuc
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
                     CHOOSE YOUR TRAVEL DATE
                   </label>
-                  <div className="relative flex items-center">
+                  <div className="relative flex items-center" ref={dateRef}>
                     <input
                       type="date"
                       min={todayStr}
                       value={selectedDate}
-                      onChange={(e) => setSelectedDate(e.target.value)}
+                      onChange={(e) => {
+                        setSelectedDate(e.target.value);
+                        if (formErrors.date) setFormErrors({ ...formErrors, date: '' });
+                      }}
                       onClick={(e) => { try { e.target.showPicker && e.target.showPicker(); } catch (err) {} }}
-                      className="w-full bg-[#fdfbf7] border border-amber-200/70 rounded-xl py-3 px-4 text-slate-700 font-medium focus:outline-none focus:border-amber-500 cursor-pointer text-sm pr-10 shadow-sm [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                      className={`w-full bg-[#fdfbf7] border rounded-xl py-3 px-4 text-slate-700 font-medium focus:outline-none focus:border-amber-500 cursor-pointer text-sm pr-10 shadow-sm [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer ${
+                        formErrors.date ? 'border-rose-500 bg-rose-50' : 'border-amber-200/70'
+                      }`}
                     />
-                    <Calendar className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-900 pointer-events-none" />
+                    <Calendar className={`absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none ${formErrors.date ? 'text-rose-500' : 'text-slate-900'}`} />
                   </div>
+                  {formErrors.date && (
+                    <div className="mt-1.5 flex items-center gap-1.5 text-rose-500">
+                      <AlertCircle className="w-3.5 h-3.5" />
+                      <span className="text-xs font-medium">{formErrors.date}</span>
+                    </div>
+                  )}
                   <div className="mt-2.5 flex items-center gap-2 text-xs text-slate-600 font-normal">
                     <Calendar className="w-4 h-4 text-amber-500 shrink-0" />
                     <span>Private trip — start on any date you like.</span>
@@ -515,28 +574,70 @@ export default function PackageDetailsPage({ packageItem, onGoBack, onBookingSuc
 
                 {/* Booking Form */}
                 <div className="space-y-3 mb-6">
-                  <input 
-                    type="text" 
-                    placeholder="Your name" 
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:border-amber-500 text-sm"
-                  />
-                  <input 
-                    type="tel" 
-                    placeholder="Mobile number" 
-                    value={customerMobile}
-                    onChange={(e) => setCustomerMobile(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:border-amber-500 text-sm"
-                  />
+                  <div ref={nameRef}>
+                    <input 
+                      type="text" 
+                      placeholder="Your name" 
+                      value={customerName}
+                      onChange={(e) => {
+                        setCustomerName(e.target.value);
+                        if (formErrors.name) setFormErrors({ ...formErrors, name: '' });
+                      }}
+                      className={`w-full px-4 py-2.5 rounded-lg border focus:outline-none focus:border-amber-500 text-sm ${
+                        formErrors.name ? 'border-rose-500 bg-rose-50' : 'border-slate-200'
+                      }`}
+                    />
+                    {formErrors.name && (
+                      <div className="mt-1.5 flex items-center gap-1.5 text-rose-500">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                        <span className="text-xs font-medium">{formErrors.name}</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div ref={mobileRef}>
+                    <input 
+                      type="tel" 
+                      placeholder="Mobile number" 
+                      value={customerMobile}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (/^\d*$/.test(val)) {
+                          setCustomerMobile(val);
+                          if (formErrors.mobile) setFormErrors({ ...formErrors, mobile: '' });
+                        }
+                      }}
+                      className={`w-full px-4 py-2.5 rounded-lg border focus:outline-none focus:border-amber-500 text-sm ${
+                        formErrors.mobile ? 'border-rose-500 bg-rose-50' : 'border-slate-200'
+                      }`}
+                    />
+                    {formErrors.mobile && (
+                      <div className="mt-1.5 flex items-center gap-1.5 text-rose-500">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                        <span className="text-xs font-medium">{formErrors.mobile}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
+
+                {formErrors.general && (
+                  <div className="mb-4 p-3 bg-rose-50 text-rose-600 rounded-lg text-sm flex items-start gap-2 border border-rose-100">
+                    <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                    <p>{formErrors.general}</p>
+                  </div>
+                )}
 
                 <div className="space-y-3">
                   <button 
                     onClick={handleBook}
-                    className="w-full py-3.5 bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold uppercase tracking-widest text-xs rounded-lg transition-colors shadow-lg shadow-amber-500/30"
+                    disabled={bookingLoading}
+                    className={`w-full py-3.5 font-extrabold uppercase tracking-widest text-xs rounded-lg transition-colors shadow-lg ${
+                      bookingLoading 
+                        ? 'bg-amber-400 text-slate-700 cursor-not-allowed opacity-70' 
+                        : 'bg-amber-500 hover:bg-amber-600 text-slate-900 shadow-amber-500/30'
+                    }`}
                   >
-                    BOOK THIS PACKAGE
+                    {bookingLoading ? 'BOOKING...' : 'BOOK THIS PACKAGE'}
                   </button>
                   <button 
                     className="w-full py-3.5 bg-white border border-slate-300 hover:border-slate-400 hover:bg-slate-50 text-slate-700 font-bold uppercase tracking-widest text-xs rounded-lg transition-colors flex items-center justify-center gap-2"
