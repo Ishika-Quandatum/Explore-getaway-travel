@@ -444,6 +444,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     setPkgTripleSharing('');
     setPkgBadge('POPULAR');
     setPkgRating('');
+    setPkgImg('');
     setPkgFileName('');
     setGalleryFileNames('');
     setPkgOverview('');
