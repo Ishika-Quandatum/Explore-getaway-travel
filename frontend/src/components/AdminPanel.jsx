@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api, { getImageUrl } from '../api/axios';
-import { ShieldCheck, Package, ShoppingBag, Tag, Layers, DollarSign, Plus, Trash2, Edit, CheckCircle, Clock, XCircle, ArrowLeft, RefreshCw, BookOpen, X, ToggleLeft, ToggleRight, ChevronDown, ChevronLeft, ChevronRight, Calendar, ArrowRight, Activity, CreditCard, AlignLeft, Percent } from 'lucide-react';
+import { ShieldCheck, Package, ShoppingBag, Tag, Layers, DollarSign, Plus, Trash2, Edit, CheckCircle, Clock, XCircle, ArrowLeft, RefreshCw, BookOpen, X, ToggleLeft, ToggleRight, ChevronDown, ChevronLeft, ChevronRight, Calendar, ArrowRight, Activity, CreditCard, AlignLeft, Percent, Search } from 'lucide-react';
 
 const slugify = (text) => {
   return text
@@ -74,31 +74,63 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
   const [catDisplayLabel, setCatDisplayLabel] = useState('for_everyone');
   const [catActive, setCatActive] = useState(true);
 
-  // Category Pagination State
+  // Category Pagination & Search State
+  const [categorySearchQuery, setCategorySearchQuery] = useState('');
   const [categoryPage, setCategoryPage] = useState(1);
-  const categoriesPerPage = 5;
-  const totalCategoryPages = Math.ceil(categories.length / categoriesPerPage) || 1;
+  const categoriesPerPage = 10;
+
+  const filteredCategories = categories.filter((cat) => {
+    if (!categorySearchQuery.trim()) return true;
+    const query = categorySearchQuery.toLowerCase().trim();
+    return cat.name?.toLowerCase().includes(query);
+  });
+
+  const totalCategoryPages = Math.ceil(filteredCategories.length / categoriesPerPage) || 1;
   const categoryIndexOfLastItem = categoryPage * categoriesPerPage;
   const categoryIndexOfFirstItem = categoryIndexOfLastItem - categoriesPerPage;
-  const currentCategories = categories.slice(categoryIndexOfFirstItem, categoryIndexOfLastItem);
+  const currentCategories = filteredCategories.slice(categoryIndexOfFirstItem, categoryIndexOfLastItem);
 
   useEffect(() => {
-    const maxPage = Math.ceil(categories.length / categoriesPerPage) || 1;
-    if (categoryPage > maxPage) setCategoryPage(maxPage);
-  }, [categories.length, categoryPage]);
+    setCategoryPage(1);
+  }, [categorySearchQuery]);
 
-  // Package Pagination State
+  useEffect(() => {
+    const maxPage = Math.ceil(filteredCategories.length / categoriesPerPage) || 1;
+    if (categoryPage > maxPage) setCategoryPage(maxPage);
+  }, [filteredCategories.length, categoryPage]);
+
+  // Package Pagination & Search State
+  const [packageSearchQuery, setPackageSearchQuery] = useState('');
   const [packagePage, setPackagePage] = useState(1);
-  const packagesPerPage = 5;
-  const totalPackagePages = Math.ceil(packages.length / packagesPerPage) || 1;
+  const packagesPerPage = 10;
+
+  const filteredPackages = packages.filter((pkg) => {
+    if (!packageSearchQuery.trim()) return true;
+    const query = packageSearchQuery.toLowerCase().trim();
+    const titleMatch = pkg.title?.toLowerCase().includes(query);
+
+    const destName = pkg.destination_details?.name || (typeof pkg.destination === 'object' ? pkg.destination?.name : '') || (destinations.find(d => String(d.id) === String(pkg.destination))?.name) || '';
+    const destMatch = destName.toLowerCase().includes(query);
+
+    const catName = pkg.category_details?.name || (typeof pkg.category === 'object' ? pkg.category?.name : '') || (categories.find(c => String(c.id) === String(pkg.category))?.name) || '';
+    const catMatch = catName.toLowerCase().includes(query);
+
+    return titleMatch || destMatch || catMatch;
+  });
+
+  const totalPackagePages = Math.ceil(filteredPackages.length / packagesPerPage) || 1;
   const packageIndexOfLastItem = packagePage * packagesPerPage;
   const packageIndexOfFirstItem = packageIndexOfLastItem - packagesPerPage;
-  const currentPackages = packages.slice(packageIndexOfFirstItem, packageIndexOfLastItem);
+  const currentPackages = filteredPackages.slice(packageIndexOfFirstItem, packageIndexOfLastItem);
 
   useEffect(() => {
-    const maxPage = Math.ceil(packages.length / packagesPerPage) || 1;
+    setPackagePage(1);
+  }, [packageSearchQuery]);
+
+  useEffect(() => {
+    const maxPage = Math.ceil(filteredPackages.length / packagesPerPage) || 1;
     if (packagePage > maxPage) setPackagePage(maxPage);
-  }, [packages.length, packagePage]);
+  }, [filteredPackages.length, packagePage]);
 
   // Booking Pagination State
   const [bookingPage, setBookingPage] = useState(1);
@@ -113,44 +145,82 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     if (bookingPage > maxPage) setBookingPage(maxPage);
   }, [bookings.length, bookingPage]);
 
-  // Coupon Pagination State
+  // Coupon Pagination & Search State
+  const [couponSearchQuery, setCouponSearchQuery] = useState('');
   const [couponPage, setCouponPage] = useState(1);
-  const couponsPerPage = 5;
-  const totalCouponPages = Math.ceil(coupons.length / couponsPerPage) || 1;
+  const couponsPerPage = 10;
+
+  const filteredCoupons = coupons.filter((cpn) => {
+    if (!couponSearchQuery.trim()) return true;
+    const query = couponSearchQuery.toLowerCase().trim();
+    const headingMatch = cpn.heading?.toLowerCase().includes(query);
+    const codeMatch = cpn.offer_code?.toLowerCase().includes(query);
+    return headingMatch || codeMatch;
+  });
+
+  const totalCouponPages = Math.ceil(filteredCoupons.length / couponsPerPage) || 1;
   const couponIndexOfLastItem = couponPage * couponsPerPage;
   const couponIndexOfFirstItem = couponIndexOfLastItem - couponsPerPage;
-  const currentCoupons = coupons.slice(couponIndexOfFirstItem, couponIndexOfLastItem);
+  const currentCoupons = filteredCoupons.slice(couponIndexOfFirstItem, couponIndexOfLastItem);
 
   useEffect(() => {
-    const maxPage = Math.ceil(coupons.length / couponsPerPage) || 1;
-    if (couponPage > maxPage) setCouponPage(maxPage);
-  }, [coupons.length, couponPage]);
+    setCouponPage(1);
+  }, [couponSearchQuery]);
 
-  // Destination Pagination State
+  useEffect(() => {
+    const maxPage = Math.ceil(filteredCoupons.length / couponsPerPage) || 1;
+    if (couponPage > maxPage) setCouponPage(maxPage);
+  }, [filteredCoupons.length, couponPage]);
+
+  // Destination Pagination & Search State
+  const [destinationSearchQuery, setDestinationSearchQuery] = useState('');
   const [destinationPage, setDestinationPage] = useState(1);
-  const destinationsPerPage = 5;
-  const totalDestinationPages = Math.ceil(destinations.length / destinationsPerPage) || 1;
+  const destinationsPerPage = 10;
+
+  const filteredDestinations = destinations.filter((dest) => {
+    if (!destinationSearchQuery.trim()) return true;
+    const query = destinationSearchQuery.toLowerCase().trim();
+    return dest.name?.toLowerCase().includes(query);
+  });
+
+  const totalDestinationPages = Math.ceil(filteredDestinations.length / destinationsPerPage) || 1;
   const destinationIndexOfLastItem = destinationPage * destinationsPerPage;
   const destinationIndexOfFirstItem = destinationIndexOfLastItem - destinationsPerPage;
-  const currentDestinations = destinations.slice(destinationIndexOfFirstItem, destinationIndexOfLastItem);
+  const currentDestinations = filteredDestinations.slice(destinationIndexOfFirstItem, destinationIndexOfLastItem);
 
   useEffect(() => {
-    const maxPage = Math.ceil(destinations.length / destinationsPerPage) || 1;
-    if (destinationPage > maxPage) setDestinationPage(maxPage);
-  }, [destinations.length, destinationPage]);
+    setDestinationPage(1);
+  }, [destinationSearchQuery]);
 
-  // Blog Pagination State
+  useEffect(() => {
+    const maxPage = Math.ceil(filteredDestinations.length / destinationsPerPage) || 1;
+    if (destinationPage > maxPage) setDestinationPage(maxPage);
+  }, [filteredDestinations.length, destinationPage]);
+
+  // Blog Pagination & Search State
+  const [blogSearchQuery, setBlogSearchQuery] = useState('');
   const [blogPage, setBlogPage] = useState(1);
-  const blogsPerPage = 5;
-  const totalBlogPages = Math.ceil(blogs.length / blogsPerPage) || 1;
+  const blogsPerPage = 10;
+
+  const filteredBlogs = blogs.filter((blog) => {
+    if (!blogSearchQuery.trim()) return true;
+    const query = blogSearchQuery.toLowerCase().trim();
+    return blog.title?.toLowerCase().includes(query);
+  });
+
+  const totalBlogPages = Math.ceil(filteredBlogs.length / blogsPerPage) || 1;
   const blogIndexOfLastItem = blogPage * blogsPerPage;
   const blogIndexOfFirstItem = blogIndexOfLastItem - blogsPerPage;
-  const currentBlogs = blogs.slice(blogIndexOfFirstItem, blogIndexOfLastItem);
+  const currentBlogs = filteredBlogs.slice(blogIndexOfFirstItem, blogIndexOfLastItem);
 
   useEffect(() => {
-    const maxPage = Math.ceil(blogs.length / blogsPerPage) || 1;
+    setBlogPage(1);
+  }, [blogSearchQuery]);
+
+  useEffect(() => {
+    const maxPage = Math.ceil(filteredBlogs.length / blogsPerPage) || 1;
     if (blogPage > maxPage) setBlogPage(maxPage);
-  }, [blogs.length, blogPage]);
+  }, [filteredBlogs.length, blogPage]);
 
   // Destination Modal Form State
   const [showDestinationModal, setShowDestinationModal] = useState(false);
@@ -667,12 +737,6 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
             </p>
           </div>
         </div>
-        <div className="flex items-center bg-white px-4 py-2 rounded-full border border-slate-200 shadow-sm gap-2 text-sm text-slate-600 cursor-pointer hover:bg-slate-50">
-          <Calendar className="w-4 h-4 text-indigo-500" />
-          <span className="font-medium text-slate-500">Filter:</span>
-          <span className="font-medium text-slate-800">All Time</span>
-          <ChevronDown className="w-4 h-4 ml-2" />
-        </div>
       </div>
 
       {/* Overview Stat Widgets */}
@@ -842,15 +906,39 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
       {/* TAB 1: MANAGE PACKAGES */}
       {activeTab === 'packages' && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-800">Tour Packages Directory</h2>
-            <button
-              onClick={() => { resetPackageForm(); setShowPackageModal(true); }}
-              className="px-4 py-2 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md"
-            >
-              <Plus className="w-4 h-4" />
-              Add New Package
-            </button>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-800">Tour Packages Directory</h2>
+              <button
+                onClick={() => { resetPackageForm(); setShowPackageModal(true); }}
+                className="px-4 py-2 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                Add New Package
+              </button>
+            </div>
+
+            {/* Search Packages Input */}
+            <div className="relative w-full max-w-md">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search packages by name, destination or category…"
+                value={packageSearchQuery}
+                onChange={(e) => setPackageSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-9 py-2.5 bg-white text-slate-800 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all shadow-sm"
+              />
+              {packageSearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setPackageSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100 transition-colors"
+                  title="Clear search"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
@@ -867,8 +955,12 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  {packages.length === 0 ? (
-                    <tr><td colSpan="6" className="p-8 text-center text-slate-500">No packages added yet.</td></tr>
+                  {filteredPackages.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" className="p-8 text-center text-slate-500 font-medium">
+                        {packageSearchQuery ? `No packages found matching "${packageSearchQuery}".` : 'No packages added yet.'}
+                      </td>
+                    </tr>
                   ) : currentPackages.map((pkg) => (
                     <tr key={pkg.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-4 font-bold text-slate-900 flex items-center gap-3">
@@ -913,7 +1005,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
             {/* Pagination controls at bottom-right of table */}
             <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
               <div className="text-xs text-slate-500 font-medium">
-                Showing <span className="font-semibold text-slate-800">{packages.length > 0 ? packageIndexOfFirstItem + 1 : 0}</span> to <span className="font-semibold text-slate-800">{Math.min(packageIndexOfLastItem, packages.length)}</span> of <span className="font-semibold text-slate-800">{packages.length}</span> packages
+                Showing <span className="font-semibold text-slate-800">{filteredPackages.length > 0 ? packageIndexOfFirstItem + 1 : 0}</span> to <span className="font-semibold text-slate-800">{Math.min(packageIndexOfLastItem, filteredPackages.length)}</span> of <span className="font-semibold text-slate-800">{filteredPackages.length}</span> packages
               </div>
               <div className="flex items-center gap-2 ml-auto">
                 <button
@@ -1047,15 +1139,39 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
       {/* TAB 3: MANAGE COUPONS */}
       {activeTab === 'coupons' && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-800">Coupons Directory</h2>
-            <button
-              onClick={() => { resetCouponForm(); setShowCouponModal(true); }}
-              className="px-4 py-2 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md"
-            >
-              <Plus className="w-4 h-4" />
-              Add New Coupon
-            </button>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-800">Coupons Directory</h2>
+              <button
+                onClick={() => { resetCouponForm(); setShowCouponModal(true); }}
+                className="px-4 py-2 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                Add New Coupon
+              </button>
+            </div>
+
+            {/* Search Coupons Input */}
+            <div className="relative w-full max-w-md">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search coupons by heading or offer code"
+                value={couponSearchQuery}
+                onChange={(e) => setCouponSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-9 py-2.5 bg-white text-slate-800 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all shadow-sm"
+              />
+              {couponSearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setCouponSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100 transition-colors"
+                  title="Clear search"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
@@ -1072,8 +1188,12 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  {coupons.length === 0 ? (
-                    <tr><td colSpan="6" className="p-8 text-center text-slate-500">No coupons added yet.</td></tr>
+                  {filteredCoupons.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" className="p-8 text-center text-slate-500 font-medium">
+                        {couponSearchQuery ? `No coupon matches "${couponSearchQuery}".` : 'No coupons added yet.'}
+                      </td>
+                    </tr>
                   ) : currentCoupons.map((cpn) => (
                     <tr key={cpn.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-4">
@@ -1116,7 +1236,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
             {/* Pagination controls at bottom-right of table */}
             <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
               <div className="text-xs text-slate-500 font-medium">
-                Showing <span className="font-semibold text-slate-800">{coupons.length > 0 ? couponIndexOfFirstItem + 1 : 0}</span> to <span className="font-semibold text-slate-800">{Math.min(couponIndexOfLastItem, coupons.length)}</span> of <span className="font-semibold text-slate-800">{coupons.length}</span> coupons
+                Showing <span className="font-semibold text-slate-800">{filteredCoupons.length > 0 ? couponIndexOfFirstItem + 1 : 0}</span> to <span className="font-semibold text-slate-800">{Math.min(couponIndexOfLastItem, filteredCoupons.length)}</span> of <span className="font-semibold text-slate-800">{filteredCoupons.length}</span> coupons
               </div>
               <div className="flex items-center gap-2 ml-auto">
                 <button
@@ -1159,15 +1279,39 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
       {/* TAB 4: MANAGE DESTINATIONS */}
       {activeTab === 'destinations' && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-800">Destinations Directory</h2>
-            <button
-              onClick={() => { resetDestinationForm(); setShowDestinationModal(true); }}
-              className="px-4 py-2 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md"
-            >
-              <Plus className="w-4 h-4" />
-              Add New Destination
-            </button>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-800">Destinations Directory</h2>
+              <button
+                onClick={() => { resetDestinationForm(); setShowDestinationModal(true); }}
+                className="px-4 py-2 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                Add New Destination
+              </button>
+            </div>
+
+            {/* Search Destinations Input */}
+            <div className="relative w-full max-w-md">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search destinations by destination name…"
+                value={destinationSearchQuery}
+                onChange={(e) => setDestinationSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-9 py-2.5 bg-white text-slate-800 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all shadow-sm"
+              />
+              {destinationSearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setDestinationSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100 transition-colors"
+                  title="Clear search"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
@@ -1183,8 +1327,12 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  {destinations.length === 0 ? (
-                    <tr><td colSpan="5" className="p-8 text-center text-slate-500">No destinations added yet.</td></tr>
+                  {filteredDestinations.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="p-8 text-center text-slate-500 font-medium">
+                        {destinationSearchQuery ? `No destination matches the "${destinationSearchQuery}".` : 'No destinations added yet.'}
+                      </td>
+                    </tr>
                   ) : currentDestinations.map((dest) => (
                     <tr key={dest.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-4">
@@ -1225,7 +1373,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
             {/* Pagination controls at bottom-right of table */}
             <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
               <div className="text-xs text-slate-500 font-medium">
-                Showing <span className="font-semibold text-slate-800">{destinations.length > 0 ? destinationIndexOfFirstItem + 1 : 0}</span> to <span className="font-semibold text-slate-800">{Math.min(destinationIndexOfLastItem, destinations.length)}</span> of <span className="font-semibold text-slate-800">{destinations.length}</span> destinations
+                Showing <span className="font-semibold text-slate-800">{filteredDestinations.length > 0 ? destinationIndexOfFirstItem + 1 : 0}</span> to <span className="font-semibold text-slate-800">{Math.min(destinationIndexOfLastItem, filteredDestinations.length)}</span> of <span className="font-semibold text-slate-800">{filteredDestinations.length}</span> destinations
               </div>
               <div className="flex items-center gap-2 ml-auto">
                 <button
@@ -1268,15 +1416,39 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
       {/* TAB 5: MANAGE CATEGORIES */}
       {activeTab === 'categories' && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-800">Categories Directory</h2>
-            <button
-              onClick={() => { resetCategoryForm(); setShowCategoryModal(true); }}
-              className="px-4 py-2 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md"
-            >
-              <Plus className="w-4 h-4" />
-              Add New Category
-            </button>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-800">Categories Directory</h2>
+              <button
+                onClick={() => { resetCategoryForm(); setShowCategoryModal(true); }}
+                className="px-4 py-2 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                Add New Category
+              </button>
+            </div>
+
+            {/* Search Categories Input */}
+            <div className="relative w-full max-w-md">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search categories by name…"
+                value={categorySearchQuery}
+                onChange={(e) => setCategorySearchQuery(e.target.value)}
+                className="w-full pl-10 pr-9 py-2.5 bg-white text-slate-800 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all shadow-sm"
+              />
+              {categorySearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setCategorySearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100 transition-colors"
+                  title="Clear search"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
@@ -1292,8 +1464,12 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  {categories.length === 0 ? (
-                    <tr><td colSpan="5" className="p-8 text-center text-slate-500">No categories added yet.</td></tr>
+                  {filteredCategories.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="p-8 text-center text-slate-500 font-medium">
+                        {categorySearchQuery ? `No category matches the "${categorySearchQuery}".` : 'No categories added yet.'}
+                      </td>
+                    </tr>
                   ) : currentCategories.map((cat) => (
                     <tr key={cat.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-4">
@@ -1348,7 +1524,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
             {/* Pagination controls at bottom-right of table */}
             <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
               <div className="text-xs text-slate-500 font-medium">
-                Showing <span className="font-semibold text-slate-800">{categories.length > 0 ? categoryIndexOfFirstItem + 1 : 0}</span> to <span className="font-semibold text-slate-800">{Math.min(categoryIndexOfLastItem, categories.length)}</span> of <span className="font-semibold text-slate-800">{categories.length}</span> categories
+                Showing <span className="font-semibold text-slate-800">{filteredCategories.length > 0 ? categoryIndexOfFirstItem + 1 : 0}</span> to <span className="font-semibold text-slate-800">{Math.min(categoryIndexOfLastItem, filteredCategories.length)}</span> of <span className="font-semibold text-slate-800">{filteredCategories.length}</span> categories
               </div>
               <div className="flex items-center gap-2 ml-auto">
                 <button
@@ -1391,15 +1567,39 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
       {/* TAB 6: MANAGE BLOGS */}
       {activeTab === 'blogs' && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-800">Blogs Directory</h2>
-            <button
-              onClick={() => { resetBlogForm(); setShowBlogModal(true); }}
-              className="px-4 py-2 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md"
-            >
-              <Plus className="w-4 h-4" />
-              Add New Blog Article
-            </button>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-800">Blogs Directory</h2>
+              <button
+                onClick={() => { resetBlogForm(); setShowBlogModal(true); }}
+                className="px-4 py-2 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                Add New Blog Article
+              </button>
+            </div>
+
+            {/* Search Blogs Input */}
+            <div className="relative w-full max-w-md">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search blogs by title…"
+                value={blogSearchQuery}
+                onChange={(e) => setBlogSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-9 py-2.5 bg-white text-slate-800 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all shadow-sm"
+              />
+              {blogSearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setBlogSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-100 transition-colors"
+                  title="Clear search"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
@@ -1415,8 +1615,12 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  {blogs.length === 0 ? (
-                    <tr><td colSpan="5" className="p-8 text-center text-slate-500">No blogs added yet.</td></tr>
+                  {filteredBlogs.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="p-8 text-center text-slate-500 font-medium">
+                        {blogSearchQuery ? `No blog matches the "${blogSearchQuery}".` : 'No blogs added yet.'}
+                      </td>
+                    </tr>
                   ) : currentBlogs.map((blog) => (
                     <tr key={blog.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-4">
@@ -1448,7 +1652,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
             {/* Pagination controls at bottom-right of table */}
             <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
               <div className="text-xs text-slate-500 font-medium">
-                Showing <span className="font-semibold text-slate-800">{blogs.length > 0 ? blogIndexOfFirstItem + 1 : 0}</span> to <span className="font-semibold text-slate-800">{Math.min(blogIndexOfLastItem, blogs.length)}</span> of <span className="font-semibold text-slate-800">{blogs.length}</span> blogs
+                Showing <span className="font-semibold text-slate-800">{filteredBlogs.length > 0 ? blogIndexOfFirstItem + 1 : 0}</span> to <span className="font-semibold text-slate-800">{Math.min(blogIndexOfLastItem, filteredBlogs.length)}</span> of <span className="font-semibold text-slate-800">{filteredBlogs.length}</span> blogs
               </div>
               <div className="flex items-center gap-2 ml-auto">
                 <button
