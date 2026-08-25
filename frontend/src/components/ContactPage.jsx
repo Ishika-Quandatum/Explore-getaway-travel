@@ -221,16 +221,6 @@ const ContactPage = ({ onGoBack }) => {
                 </div>
               </div>
 
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
-                  <Clock className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Working Hours</p>
-                  <p className="text-sm text-slate-700">Mon – Sat: 9:00 AM – 7:00 PM</p>
-                  <p className="text-sm text-slate-700">Sunday: 10:00 AM – 4:00 PM</p>
-                </div>
-              </div>
             </div>
 
             {/* Map placeholder */}
