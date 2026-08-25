@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api, { getImageUrl } from '../api/axios';
 import { ShieldCheck, Package, ShoppingBag, Tag, Layers, DollarSign, Plus, Trash2, Edit, CheckCircle, Clock, XCircle, ArrowLeft, RefreshCw, BookOpen, X, ToggleLeft, ToggleRight, ChevronDown, ChevronLeft, ChevronRight, Calendar, ArrowRight, Activity, CreditCard, AlignLeft, Percent, Search } from 'lucide-react';
 
@@ -54,6 +54,20 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
   const [pkgExclusions, setPkgExclusions] = useState('');
   const [pkgItinerary, setPkgItinerary] = useState([{ day_number: 1, title: '', description: '' }]);
   const [pkgGallery, setPkgGallery] = useState([]);
+  const [pkgErrors, setPkgErrors] = useState({});
+  const pkgFormRef = useRef(null);
+
+  const [destErrors, setDestErrors] = useState({});
+  const destFormRef = useRef(null);
+
+  const [catErrors, setCatErrors] = useState({});
+  const catFormRef = useRef(null);
+
+  const [cpnErrors, setCpnErrors] = useState({});
+  const cpnFormRef = useRef(null);
+
+  const [blogErrors, setBlogErrors] = useState({});
+  const blogFormRef = useRef(null);
 
   // Coupon Modal Form State
   const [showCouponModal, setShowCouponModal] = useState(false);
@@ -316,7 +330,37 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
 
   const handleSavePackage = async (e) => {
     e.preventDefault();
-    
+
+    // Client-side required field validation
+    const requiredFields = [
+      { key: 'pkgTitle', value: pkgTitle, ref: 'pkg-title' },
+      { key: 'pkgDest', value: pkgDest, ref: 'pkg-dest' },
+      { key: 'pkgNights', value: pkgNights, ref: 'pkg-nights' },
+      { key: 'pkgDays', value: pkgDays, ref: 'pkg-days' },
+      { key: 'pkgPrice', value: pkgPrice, ref: 'pkg-price' },
+      { key: 'pkgLocation', value: pkgLocation, ref: 'pkg-location' },
+      { key: 'pkgImg', value: pkgImg, ref: 'pkg-image' },
+    ];
+    const newErrors = {};
+    requiredFields.forEach(({ key, value }) => {
+      if (value === '' || value === null || value === undefined) {
+        newErrors[key] = 'This field is required';
+      }
+    });
+    setPkgErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      const firstErrorKey = requiredFields.find(f => newErrors[f.key]);
+      if (firstErrorKey && pkgFormRef.current) {
+        const el = pkgFormRef.current.querySelector(`[data-field="${firstErrorKey.ref}"]`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const input = el.querySelector('input, select, textarea, button');
+          if (input) setTimeout(() => input.focus(), 300);
+        }
+      }
+      return;
+    }
+
     // Ensure day numbers are sequential and valid
     const formattedItinerary = pkgItinerary.map((day, i) => ({
       ...day,
@@ -363,7 +407,15 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
       }
     } catch (err) {
       console.error('Failed to save package:', err);
-      alert('Failed to save package. Ensure all fields are valid.');
+      const errors = err.response?.data;
+      if (errors && typeof errors === 'object') {
+        const messages = Object.entries(errors)
+          .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+          .join('\n');
+        alert(`Failed to save package:\n${messages}`);
+      } else {
+        alert('Failed to save package. Ensure all fields are valid.');
+      }
     }
   };
 
@@ -401,6 +453,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     setPkgExclusions('');
     setPkgGallery([]);
     setPkgItinerary([{ day_number: 1, title: '', description: '' }]);
+    setPkgErrors({});
   };
 
   const openEditPackage = (pkg) => {
@@ -494,6 +547,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     setCpnImg('');
     setCpnActive(true);
     setCpnFileName('');
+    setCpnErrors({});
   };
 
   const openEditCoupon = (c) => {
@@ -508,6 +562,33 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
 
   const handleSaveCoupon = async (e) => {
     e.preventDefault();
+
+    // Client-side required field validation
+    const requiredFields = [
+      { key: 'cpnHeading', value: cpnHeading, ref: 'cpn-heading' },
+      { key: 'cpnCode', value: cpnCode, ref: 'cpn-code' },
+      { key: 'cpnImg', value: cpnImg, ref: 'cpn-image' },
+    ];
+    const newErrors = {};
+    requiredFields.forEach(({ key, value }) => {
+      if (value === '' || value === null || value === undefined) {
+        newErrors[key] = 'This field is required';
+      }
+    });
+    setCpnErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      const firstErrorKey = requiredFields.find(f => newErrors[f.key]);
+      if (firstErrorKey && cpnFormRef.current) {
+        const el = cpnFormRef.current.querySelector(`[data-field="${firstErrorKey.ref}"]`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const input = el.querySelector('input, select, textarea, button');
+          if (input) setTimeout(() => input.focus(), 300);
+        }
+      }
+      return;
+    }
+
     const payload = {
       heading: cpnHeading,
       description: cpnDesc,
@@ -550,6 +631,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     setCatDisplayLabel('for_everyone');
     setCatActive(true);
     setCatFileName('');
+    setCatErrors({});
   };
 
   const openEditCategory = (c) => {
@@ -565,6 +647,32 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
 
   const handleSaveCategory = async (e) => {
     e.preventDefault();
+
+    // Client-side required field validation
+    const requiredFields = [
+      { key: 'catName', value: catName, ref: 'cat-name' },
+      { key: 'catImg', value: catImg, ref: 'cat-image' },
+    ];
+    const newErrors = {};
+    requiredFields.forEach(({ key, value }) => {
+      if (value === '' || value === null || value === undefined) {
+        newErrors[key] = 'This field is required';
+      }
+    });
+    setCatErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      const firstErrorKey = requiredFields.find(f => newErrors[f.key]);
+      if (firstErrorKey && catFormRef.current) {
+        const el = catFormRef.current.querySelector(`[data-field="${firstErrorKey.ref}"]`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const input = el.querySelector('input, select, textarea, button');
+          if (input) setTimeout(() => input.focus(), 300);
+        }
+      }
+      return;
+    }
+
     const payload = {
       name: catName,
       slug: slugify(catName),
@@ -609,6 +717,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     setDestDesc('');
     setDestIsPopular(true);
     setDestFileName('');
+    setDestErrors({});
   };
 
   const openEditDestination = (d) => {
@@ -624,6 +733,32 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
 
   const handleSaveDestination = async (e) => {
     e.preventDefault();
+
+    // Client-side required field validation
+    const requiredFields = [
+      { key: 'destName', value: destName, ref: 'dest-name' },
+      { key: 'destImg', value: destImg, ref: 'dest-image' },
+    ];
+    const newErrors = {};
+    requiredFields.forEach(({ key, value }) => {
+      if (value === '' || value === null || value === undefined) {
+        newErrors[key] = 'This field is required';
+      }
+    });
+    setDestErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      const firstErrorKey = requiredFields.find(f => newErrors[f.key]);
+      if (firstErrorKey && destFormRef.current) {
+        const el = destFormRef.current.querySelector(`[data-field="${firstErrorKey.ref}"]`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const input = el.querySelector('input, select, textarea, button');
+          if (input) setTimeout(() => input.focus(), 300);
+        }
+      }
+      return;
+    }
+
     const payload = {
       name: destName,
       slug: slugify(destName),
@@ -667,6 +802,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     setBlogImg('');
     setBlogAuthor('Admin');
     setBlogFileName('');
+    setBlogErrors({});
   };
 
   const openEditBlog = (b) => {
@@ -682,6 +818,35 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
 
   const handleSaveBlog = async (e) => {
     e.preventDefault();
+
+    // Client-side required field validation
+    const requiredFields = [
+      { key: 'blogTitle', value: blogTitle, ref: 'blog-title' },
+      { key: 'blogAuthor', value: blogAuthor, ref: 'blog-author' },
+      { key: 'blogImg', value: blogImg, ref: 'blog-image' },
+      { key: 'blogSummary', value: blogSummary, ref: 'blog-summary' },
+      { key: 'blogContent', value: blogContent, ref: 'blog-content' },
+    ];
+    const newErrors = {};
+    requiredFields.forEach(({ key, value }) => {
+      if (value === '' || value === null || value === undefined) {
+        newErrors[key] = 'This field is required';
+      }
+    });
+    setBlogErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      const firstErrorKey = requiredFields.find(f => newErrors[f.key]);
+      if (firstErrorKey && blogFormRef.current) {
+        const el = blogFormRef.current.querySelector(`[data-field="${firstErrorKey.ref}"]`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const input = el.querySelector('input, select, textarea, button');
+          if (input) setTimeout(() => input.focus(), 300);
+        }
+      }
+      return;
+    }
+
     const payload = {
       title: blogTitle,
       slug: slugify(blogTitle),
@@ -1707,31 +1872,32 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
               {editingPackageId ? 'Edit Tour Package' : 'Create New Tour Package'}
             </h3>
 
-            <form onSubmit={handleSavePackage} className="space-y-4 text-xs">
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Package Title</label>
+            <form onSubmit={handleSavePackage} className="space-y-4 text-xs" ref={pkgFormRef} noValidate>
+              <div data-field="pkg-title">
+                <label className="block text-slate-600 font-bold mb-1">Package Title <span className="text-red-500">*</span></label>
                 <input
                   type="text"
-                  required
                   placeholder="e.g. Spiti Valley Offbeat Trail"
                   value={pkgTitle}
-                  onChange={(e) => setPkgTitle(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white"
+                  onChange={(e) => { setPkgTitle(e.target.value); setPkgErrors(prev => { const n = {...prev}; delete n.pkgTitle; return n; }); }}
+                  className={`w-full px-3 py-2.5 rounded-xl bg-slate-50 border text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white ${pkgErrors.pkgTitle ? 'border-red-500' : 'border-slate-200'}`}
                 />
+                {pkgErrors.pkgTitle && <p className="text-red-500 text-[11px] mt-1 font-medium">{pkgErrors.pkgTitle}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-600 font-bold mb-1">Destination</label>
+                <div data-field="pkg-dest">
+                  <label className="block text-slate-600 font-bold mb-1">Destination <span className="text-red-500">*</span></label>
                   <select
                     value={pkgDest}
-                    onChange={(e) => setPkgDest(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white cursor-pointer"
+                    onChange={(e) => { setPkgDest(e.target.value); setPkgErrors(prev => { const n = {...prev}; delete n.pkgDest; return n; }); }}
+                    className={`w-full px-3 py-2.5 rounded-xl bg-slate-50 border text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white cursor-pointer ${pkgErrors.pkgDest ? 'border-red-500' : 'border-slate-200'}`}
                   >
                     {destinations.map((d) => (
                       <option key={d.id} value={d.id}>{d.name}</option>
                     ))}
                   </select>
+                  {pkgErrors.pkgDest && <p className="text-red-500 text-[11px] mt-1 font-medium">{pkgErrors.pkgDest}</p>}
                 </div>
                 <div>
                   <label className="block text-slate-600 font-bold mb-1">Category</label>
@@ -1749,37 +1915,39 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
 
                <div className="grid grid-cols-2 gap-4">
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-slate-600 font-bold mb-1">Nights</label>
+                  <div data-field="pkg-nights">
+                    <label className="block text-slate-600 font-bold mb-1">Nights <span className="text-red-500">*</span></label>
                     <input
                       type="number"
                       min="1"
                       value={pkgNights}
-                      onChange={(e) => setPkgNights(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white"
+                      onChange={(e) => { setPkgNights(e.target.value); setPkgErrors(prev => { const n = {...prev}; delete n.pkgNights; return n; }); }}
+                      className={`w-full px-3 py-2.5 rounded-xl bg-slate-50 border text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white ${pkgErrors.pkgNights ? 'border-red-500' : 'border-slate-200'}`}
                     />
+                    {pkgErrors.pkgNights && <p className="text-red-500 text-[11px] mt-1 font-medium">{pkgErrors.pkgNights}</p>}
                   </div>
-                  <div>
-                    <label className="block text-slate-600 font-bold mb-1">Days</label>
+                  <div data-field="pkg-days">
+                    <label className="block text-slate-600 font-bold mb-1">Days <span className="text-red-500">*</span></label>
                     <input
                       type="number"
                       min="1"
                       value={pkgDays}
-                      onChange={(e) => setPkgDays(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white"
+                      onChange={(e) => { setPkgDays(e.target.value); setPkgErrors(prev => { const n = {...prev}; delete n.pkgDays; return n; }); }}
+                      className={`w-full px-3 py-2.5 rounded-xl bg-slate-50 border text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white ${pkgErrors.pkgDays ? 'border-red-500' : 'border-slate-200'}`}
                     />
+                    {pkgErrors.pkgDays && <p className="text-red-500 text-[11px] mt-1 font-medium">{pkgErrors.pkgDays}</p>}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-slate-600 font-bold mb-1">Price / Person (₹)</label>
+                  <div data-field="pkg-price">
+                    <label className="block text-slate-600 font-bold mb-1">Price / Person (₹) <span className="text-red-500">*</span></label>
                     <input
                       type="number"
-                      required
                       value={pkgPrice}
-                      onChange={(e) => setPkgPrice(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white"
+                      onChange={(e) => { setPkgPrice(e.target.value); setPkgErrors(prev => { const n = {...prev}; delete n.pkgPrice; return n; }); }}
+                      className={`w-full px-3 py-2.5 rounded-xl bg-slate-50 border text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white ${pkgErrors.pkgPrice ? 'border-red-500' : 'border-slate-200'}`}
                     />
+                    {pkgErrors.pkgPrice && <p className="text-red-500 text-[11px] mt-1 font-medium">{pkgErrors.pkgPrice}</p>}
                   </div>
                   <div>
                     <label className="block text-slate-600 font-bold mb-1">Old Price (Optional)</label>
@@ -1820,16 +1988,16 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Location Summary</label>
+              <div data-field="pkg-location">
+                <label className="block text-slate-600 font-bold mb-1">Location Summary <span className="text-red-500">*</span></label>
                 <input
                   type="text"
-                  required
                   placeholder="e.g. Kaza, Tabo, Chandratal Lake"
                   value={pkgLocation}
-                  onChange={(e) => setPkgLocation(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white"
+                  onChange={(e) => { setPkgLocation(e.target.value); setPkgErrors(prev => { const n = {...prev}; delete n.pkgLocation; return n; }); }}
+                  className={`w-full px-3 py-2.5 rounded-xl bg-slate-50 border text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white ${pkgErrors.pkgLocation ? 'border-red-500' : 'border-slate-200'}`}
                 />
+                {pkgErrors.pkgLocation && <p className="text-red-500 text-[11px] mt-1 font-medium">{pkgErrors.pkgLocation}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -1866,9 +2034,9 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Upload Package Image</label>
-                <div className="flex items-center gap-3">
+              <div data-field="pkg-image">
+                <label className="block text-slate-600 font-bold mb-1">Upload Package Image <span className="text-red-500">*</span></label>
+                <div className={`flex items-center gap-3 p-2.5 rounded-xl border ${pkgErrors.pkgImg ? 'border-red-500 bg-red-50/30' : 'border-transparent'}`}>
                   <input
                     type="file"
                     accept="image/*"
@@ -1876,7 +2044,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                     className="hidden"
                     onChange={(e) => {
                       if (e.target.files[0]) setPkgFileName(e.target.files[0].name);
-                      handleImageUpload(e, setPkgImg);
+                      handleImageUpload(e, (url) => { setPkgImg(url); setPkgErrors(prev => { const n = {...prev}; delete n.pkgImg; return n; }); });
                     }}
                   />
                   <button
@@ -1889,6 +2057,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                   <span className="text-xs text-slate-500 truncate select-none pointer-events-none">{pkgFileName || 'No file chosen'}</span>
                   {uploading && <span className="text-amber-600 font-bold text-[10px] animate-pulse">Uploading...</span>}
                 </div>
+                {pkgErrors.pkgImg && <p className="text-red-500 text-[11px] mt-1 font-medium">{pkgErrors.pkgImg}</p>}
                 {pkgImg && (
                   <div className="mt-2 flex items-center gap-2">
                     <img src={getImageUrl(pkgImg)} alt="Preview" className="w-16 h-12 object-cover rounded-xl border border-slate-200" />
@@ -2077,17 +2246,17 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
               {editingCouponId ? 'Edit Coupon' : 'Create New Coupon'}
             </h3>
 
-            <form onSubmit={handleSaveCoupon} className="space-y-4 text-xs">
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Heading</label>
+            <form onSubmit={handleSaveCoupon} className="space-y-4 text-xs" ref={cpnFormRef} noValidate>
+              <div data-field="cpn-heading">
+                <label className="block text-slate-600 font-bold mb-1">Heading <span className="text-red-500">*</span></label>
                 <input
                   type="text"
-                  required
                   placeholder="e.g. Summer Special Discount"
                   value={cpnHeading}
-                  onChange={(e) => setCpnHeading(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white"
+                  onChange={(e) => { setCpnHeading(e.target.value); setCpnErrors(prev => { const n = {...prev}; delete n.cpnHeading; return n; }); }}
+                  className={`w-full px-3 py-2.5 rounded-xl bg-slate-50 border text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white ${cpnErrors.cpnHeading ? 'border-red-500' : 'border-slate-200'}`}
                 />
+                {cpnErrors.cpnHeading && <p className="text-red-500 text-[11px] mt-1 font-medium">{cpnErrors.cpnHeading}</p>}
               </div>
 
               <div>
@@ -2101,21 +2270,21 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 />
               </div>
 
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Offer Code</label>
+              <div data-field="cpn-code">
+                <label className="block text-slate-600 font-bold mb-1">Offer Code <span className="text-red-500">*</span></label>
                 <input
                   type="text"
-                  required
                   placeholder="e.g. SUMMER25"
                   value={cpnCode}
-                  onChange={(e) => setCpnCode(e.target.value.toUpperCase())}
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white uppercase tracking-wider font-bold"
+                  onChange={(e) => { setCpnCode(e.target.value.toUpperCase()); setCpnErrors(prev => { const n = {...prev}; delete n.cpnCode; return n; }); }}
+                  className={`w-full px-3 py-2.5 rounded-xl bg-slate-50 border text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white uppercase tracking-wider font-bold ${cpnErrors.cpnCode ? 'border-red-500' : 'border-slate-200'}`}
                 />
+                {cpnErrors.cpnCode && <p className="text-red-500 text-[11px] mt-1 font-medium">{cpnErrors.cpnCode}</p>}
               </div>
 
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Upload Coupon Image</label>
-                <div className="flex items-center gap-3">
+              <div data-field="cpn-image">
+                <label className="block text-slate-600 font-bold mb-1">Upload Coupon Image <span className="text-red-500">*</span></label>
+                <div className={`flex items-center gap-3 p-2.5 rounded-xl border ${cpnErrors.cpnImg ? 'border-red-500 bg-red-50/30' : 'border-transparent'}`}>
                   <input
                     type="file"
                     accept="image/*"
@@ -2123,7 +2292,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                     className="hidden"
                     onChange={(e) => {
                       if (e.target.files[0]) setCpnFileName(e.target.files[0].name);
-                      handleImageUpload(e, setCpnImg);
+                      handleImageUpload(e, (url) => { setCpnImg(url); setCpnErrors(prev => { const n = {...prev}; delete n.cpnImg; return n; }); });
                     }}
                   />
                   <button
@@ -2136,6 +2305,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                   <span className="text-xs text-slate-500 truncate select-none pointer-events-none">{cpnFileName || 'No file chosen'}</span>
                   {uploading && <span className="text-amber-600 font-bold text-[10px] animate-pulse">Uploading...</span>}
                 </div>
+                {cpnErrors.cpnImg && <p className="text-red-500 text-[11px] mt-1 font-medium">{cpnErrors.cpnImg}</p>}
                 {cpnImg && (
                   <div className="mt-2 flex items-center gap-2">
                     <img src={getImageUrl(cpnImg)} alt="Preview" className="w-16 h-12 object-cover rounded-xl border border-slate-200" />
@@ -2192,22 +2362,22 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
               {editingCategoryId ? 'Edit Category' : 'Create New Category'}
             </h3>
 
-            <form onSubmit={handleSaveCategory} className="space-y-4 text-xs">
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Category Name</label>
+            <form onSubmit={handleSaveCategory} className="space-y-4 text-xs" ref={catFormRef} noValidate>
+              <div data-field="cat-name">
+                <label className="block text-slate-600 font-bold mb-1">Category Name <span className="text-red-500">*</span></label>
                 <input
                   type="text"
-                  required
                   placeholder="e.g. Honeymoon"
                   value={catName}
-                  onChange={(e) => setCatName(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white"
+                  onChange={(e) => { setCatName(e.target.value); setCatErrors(prev => { const n = {...prev}; delete n.catName; return n; }); }}
+                  className={`w-full px-3 py-2.5 rounded-xl bg-slate-50 border text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white ${catErrors.catName ? 'border-red-500' : 'border-slate-200'}`}
                 />
+                {catErrors.catName && <p className="text-red-500 text-[11px] mt-1 font-medium">{catErrors.catName}</p>}
               </div>
 
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Upload Category Image</label>
-                <div className="flex items-center gap-3">
+              <div data-field="cat-image">
+                <label className="block text-slate-600 font-bold mb-1">Upload Category Image <span className="text-red-500">*</span></label>
+                <div className={`flex items-center gap-3 p-2.5 rounded-xl border ${catErrors.catImg ? 'border-red-500 bg-red-50/30' : 'border-transparent'}`}>
                   <input
                     type="file"
                     accept="image/*"
@@ -2215,7 +2385,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                     className="hidden"
                     onChange={(e) => {
                       if (e.target.files[0]) setCatFileName(e.target.files[0].name);
-                      handleImageUpload(e, setCatImg);
+                      handleImageUpload(e, (url) => { setCatImg(url); setCatErrors(prev => { const n = {...prev}; delete n.catImg; return n; }); });
                     }}
                   />
                   <button
@@ -2228,6 +2398,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                   <span className="text-xs text-slate-500 truncate select-none pointer-events-none">{catFileName || 'No file chosen'}</span>
                   {uploading && <span className="text-amber-600 font-bold text-[10px] animate-pulse">Uploading...</span>}
                 </div>
+                {catErrors.catImg && <p className="text-red-500 text-[11px] mt-1 font-medium">{catErrors.catImg}</p>}
                 {catImg && (
                   <div className="mt-2 flex items-center gap-2">
                     <img src={getImageUrl(catImg)} alt="Preview" className="w-16 h-12 object-cover rounded-xl border border-slate-200" />
@@ -2317,17 +2488,17 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
               {editingDestinationId ? 'Edit Destination' : 'Create New Destination'}
             </h3>
 
-            <form onSubmit={handleSaveDestination} className="space-y-4 text-xs">
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Destination Name</label>
+            <form onSubmit={handleSaveDestination} className="space-y-4 text-xs" ref={destFormRef} noValidate>
+              <div data-field="dest-name">
+                <label className="block text-slate-600 font-bold mb-1">Destination Name <span className="text-red-500">*</span></label>
                 <input
                   type="text"
-                  required
                   placeholder="e.g. Spiti Valley"
                   value={destName}
-                  onChange={(e) => setDestName(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white"
+                  onChange={(e) => { setDestName(e.target.value); setDestErrors(prev => { const n = {...prev}; delete n.destName; return n; }); }}
+                  className={`w-full px-3 py-2.5 rounded-xl bg-slate-50 border text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white ${destErrors.destName ? 'border-red-500' : 'border-slate-200'}`}
                 />
+                {destErrors.destName && <p className="text-red-500 text-[11px] mt-1 font-medium">{destErrors.destName}</p>}
               </div>
 
               <div>
@@ -2341,9 +2512,9 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 />
               </div>
 
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Upload Destination Image</label>
-                <div className="flex items-center gap-3">
+              <div data-field="dest-image">
+                <label className="block text-slate-600 font-bold mb-1">Upload Destination Image <span className="text-red-500">*</span></label>
+                <div className={`flex items-center gap-3 p-2.5 rounded-xl border ${destErrors.destImg ? 'border-red-500 bg-red-50/30' : 'border-transparent'}`}>
                   <input
                     type="file"
                     accept="image/*"
@@ -2351,7 +2522,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                     className="hidden"
                     onChange={(e) => {
                       if (e.target.files[0]) setDestFileName(e.target.files[0].name);
-                      handleImageUpload(e, setDestImg);
+                      handleImageUpload(e, (url) => { setDestImg(url); setDestErrors(prev => { const n = {...prev}; delete n.destImg; return n; }); });
                     }}
                   />
                   <button
@@ -2364,6 +2535,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                   <span className="text-xs text-slate-500 truncate select-none pointer-events-none">{destFileName || 'No file chosen'}</span>
                   {uploading && <span className="text-amber-600 font-bold text-[10px] animate-pulse">Uploading...</span>}
                 </div>
+                {destErrors.destImg && <p className="text-red-500 text-[11px] mt-1 font-medium">{destErrors.destImg}</p>}
                 {destImg && (
                   <div className="mt-2 flex items-center gap-2">
                     <img src={getImageUrl(destImg)} alt="Preview" className="w-16 h-12 object-cover rounded-xl border border-slate-200" />
@@ -2428,34 +2600,34 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
               {editingBlogId ? 'Edit Blog Article' : 'Create New Blog Article'}
             </h3>
 
-            <form onSubmit={handleSaveBlog} className="space-y-4 text-xs">
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Blog Title</label>
+            <form onSubmit={handleSaveBlog} className="space-y-4 text-xs" ref={blogFormRef} noValidate>
+              <div data-field="blog-title">
+                <label className="block text-slate-600 font-bold mb-1">Blog Title <span className="text-red-500">*</span></label>
                 <input
                   type="text"
-                  required
                   placeholder="e.g. 10 Secret Places in Ladakh"
                   value={blogTitle}
-                  onChange={(e) => setBlogTitle(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white"
+                  onChange={(e) => { setBlogTitle(e.target.value); setBlogErrors(prev => { const n = {...prev}; delete n.blogTitle; return n; }); }}
+                  className={`w-full px-3 py-2.5 rounded-xl bg-slate-50 border text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white ${blogErrors.blogTitle ? 'border-red-500' : 'border-slate-200'}`}
                 />
+                {blogErrors.blogTitle && <p className="text-red-500 text-[11px] mt-1 font-medium">{blogErrors.blogTitle}</p>}
               </div>
 
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Author</label>
+              <div data-field="blog-author">
+                <label className="block text-slate-600 font-bold mb-1">Author <span className="text-red-500">*</span></label>
                 <input
                   type="text"
-                  required
                   placeholder="e.g. Admin"
                   value={blogAuthor}
-                  onChange={(e) => setBlogAuthor(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white"
+                  onChange={(e) => { setBlogAuthor(e.target.value); setBlogErrors(prev => { const n = {...prev}; delete n.blogAuthor; return n; }); }}
+                  className={`w-full px-3 py-2.5 rounded-xl bg-slate-50 border text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white ${blogErrors.blogAuthor ? 'border-red-500' : 'border-slate-200'}`}
                 />
+                {blogErrors.blogAuthor && <p className="text-red-500 text-[11px] mt-1 font-medium">{blogErrors.blogAuthor}</p>}
               </div>
 
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Upload Blog Image</label>
-                <div className="flex items-center gap-3">
+              <div data-field="blog-image">
+                <label className="block text-slate-600 font-bold mb-1">Upload Blog Image <span className="text-red-500">*</span></label>
+                <div className={`flex items-center gap-3 p-2.5 rounded-xl border ${blogErrors.blogImg ? 'border-red-500 bg-red-50/30' : 'border-transparent'}`}>
                   <input
                     type="file"
                     accept="image/*"
@@ -2463,7 +2635,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                     className="hidden"
                     onChange={(e) => {
                       if (e.target.files[0]) setBlogFileName(e.target.files[0].name);
-                      handleImageUpload(e, setBlogImg);
+                      handleImageUpload(e, (url) => { setBlogImg(url); setBlogErrors(prev => { const n = {...prev}; delete n.blogImg; return n; }); });
                     }}
                   />
                   <button
@@ -2476,6 +2648,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                   <span className="text-xs text-slate-500 truncate select-none pointer-events-none">{blogFileName || 'No file chosen'}</span>
                   {uploading && <span className="text-amber-600 font-bold text-[10px] animate-pulse">Uploading...</span>}
                 </div>
+                {blogErrors.blogImg && <p className="text-red-500 text-[11px] mt-1 font-medium">{blogErrors.blogImg}</p>}
                 {blogImg && (
                   <div className="mt-2 flex items-center gap-2">
                     <img src={getImageUrl(blogImg)} alt="Preview" className="w-16 h-12 object-cover rounded-xl border border-slate-200" />
@@ -2490,28 +2663,28 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 )}
               </div>
 
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Summary (Excerpt)</label>
+              <div data-field="blog-summary">
+                <label className="block text-slate-600 font-bold mb-1">Summary (Excerpt) <span className="text-red-500">*</span></label>
                 <textarea
                   rows="2"
-                  required
                   placeholder="Short introduction excerpt..."
                   value={blogSummary}
-                  onChange={(e) => setBlogSummary(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white"
+                  onChange={(e) => { setBlogSummary(e.target.value); setBlogErrors(prev => { const n = {...prev}; delete n.blogSummary; return n; }); }}
+                  className={`w-full px-3 py-2.5 rounded-xl bg-slate-50 border text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white ${blogErrors.blogSummary ? 'border-red-500' : 'border-slate-200'}`}
                 />
+                {blogErrors.blogSummary && <p className="text-red-500 text-[11px] mt-1 font-medium">{blogErrors.blogSummary}</p>}
               </div>
 
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Blog Content</label>
+              <div data-field="blog-content">
+                <label className="block text-slate-600 font-bold mb-1">Blog Content <span className="text-red-500">*</span></label>
                 <textarea
                   rows="5"
-                  required
                   placeholder="Full article content (markdown or plain text)..."
                   value={blogContent}
-                  onChange={(e) => setBlogContent(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white"
+                  onChange={(e) => { setBlogContent(e.target.value); setBlogErrors(prev => { const n = {...prev}; delete n.blogContent; return n; }); }}
+                  className={`w-full px-3 py-2.5 rounded-xl bg-slate-50 border text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white ${blogErrors.blogContent ? 'border-red-500' : 'border-slate-200'}`}
                 />
+                {blogErrors.blogContent && <p className="text-red-500 text-[11px] mt-1 font-medium">{blogErrors.blogContent}</p>}
               </div>
 
               <button
