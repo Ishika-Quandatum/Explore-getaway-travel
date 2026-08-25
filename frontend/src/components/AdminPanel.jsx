@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api, { getImageUrl } from '../api/axios';
-import { ShieldCheck, Package, ShoppingBag, Tag, Layers, DollarSign, Plus, Trash2, Edit, CheckCircle, Clock, XCircle, ArrowLeft, RefreshCw, BookOpen, X, ToggleLeft, ToggleRight, ChevronDown, Calendar, ArrowRight, Activity, CreditCard, AlignLeft, Percent } from 'lucide-react';
+import { ShieldCheck, Package, ShoppingBag, Tag, Layers, DollarSign, Plus, Trash2, Edit, CheckCircle, Clock, XCircle, ArrowLeft, RefreshCw, BookOpen, X, ToggleLeft, ToggleRight, ChevronDown, ChevronLeft, ChevronRight, Calendar, ArrowRight, Activity, CreditCard, AlignLeft, Percent } from 'lucide-react';
 
 const slugify = (text) => {
   return text
@@ -73,6 +73,84 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
   const [catDesc, setCatDesc] = useState('');
   const [catDisplayLabel, setCatDisplayLabel] = useState('for_everyone');
   const [catActive, setCatActive] = useState(true);
+
+  // Category Pagination State
+  const [categoryPage, setCategoryPage] = useState(1);
+  const categoriesPerPage = 5;
+  const totalCategoryPages = Math.ceil(categories.length / categoriesPerPage) || 1;
+  const categoryIndexOfLastItem = categoryPage * categoriesPerPage;
+  const categoryIndexOfFirstItem = categoryIndexOfLastItem - categoriesPerPage;
+  const currentCategories = categories.slice(categoryIndexOfFirstItem, categoryIndexOfLastItem);
+
+  useEffect(() => {
+    const maxPage = Math.ceil(categories.length / categoriesPerPage) || 1;
+    if (categoryPage > maxPage) setCategoryPage(maxPage);
+  }, [categories.length, categoryPage]);
+
+  // Package Pagination State
+  const [packagePage, setPackagePage] = useState(1);
+  const packagesPerPage = 5;
+  const totalPackagePages = Math.ceil(packages.length / packagesPerPage) || 1;
+  const packageIndexOfLastItem = packagePage * packagesPerPage;
+  const packageIndexOfFirstItem = packageIndexOfLastItem - packagesPerPage;
+  const currentPackages = packages.slice(packageIndexOfFirstItem, packageIndexOfLastItem);
+
+  useEffect(() => {
+    const maxPage = Math.ceil(packages.length / packagesPerPage) || 1;
+    if (packagePage > maxPage) setPackagePage(maxPage);
+  }, [packages.length, packagePage]);
+
+  // Booking Pagination State
+  const [bookingPage, setBookingPage] = useState(1);
+  const bookingsPerPage = 5;
+  const totalBookingPages = Math.ceil(bookings.length / bookingsPerPage) || 1;
+  const bookingIndexOfLastItem = bookingPage * bookingsPerPage;
+  const bookingIndexOfFirstItem = bookingIndexOfLastItem - bookingsPerPage;
+  const currentBookings = bookings.slice(bookingIndexOfFirstItem, bookingIndexOfLastItem);
+
+  useEffect(() => {
+    const maxPage = Math.ceil(bookings.length / bookingsPerPage) || 1;
+    if (bookingPage > maxPage) setBookingPage(maxPage);
+  }, [bookings.length, bookingPage]);
+
+  // Coupon Pagination State
+  const [couponPage, setCouponPage] = useState(1);
+  const couponsPerPage = 5;
+  const totalCouponPages = Math.ceil(coupons.length / couponsPerPage) || 1;
+  const couponIndexOfLastItem = couponPage * couponsPerPage;
+  const couponIndexOfFirstItem = couponIndexOfLastItem - couponsPerPage;
+  const currentCoupons = coupons.slice(couponIndexOfFirstItem, couponIndexOfLastItem);
+
+  useEffect(() => {
+    const maxPage = Math.ceil(coupons.length / couponsPerPage) || 1;
+    if (couponPage > maxPage) setCouponPage(maxPage);
+  }, [coupons.length, couponPage]);
+
+  // Destination Pagination State
+  const [destinationPage, setDestinationPage] = useState(1);
+  const destinationsPerPage = 5;
+  const totalDestinationPages = Math.ceil(destinations.length / destinationsPerPage) || 1;
+  const destinationIndexOfLastItem = destinationPage * destinationsPerPage;
+  const destinationIndexOfFirstItem = destinationIndexOfLastItem - destinationsPerPage;
+  const currentDestinations = destinations.slice(destinationIndexOfFirstItem, destinationIndexOfLastItem);
+
+  useEffect(() => {
+    const maxPage = Math.ceil(destinations.length / destinationsPerPage) || 1;
+    if (destinationPage > maxPage) setDestinationPage(maxPage);
+  }, [destinations.length, destinationPage]);
+
+  // Blog Pagination State
+  const [blogPage, setBlogPage] = useState(1);
+  const blogsPerPage = 5;
+  const totalBlogPages = Math.ceil(blogs.length / blogsPerPage) || 1;
+  const blogIndexOfLastItem = blogPage * blogsPerPage;
+  const blogIndexOfFirstItem = blogIndexOfLastItem - blogsPerPage;
+  const currentBlogs = blogs.slice(blogIndexOfFirstItem, blogIndexOfLastItem);
+
+  useEffect(() => {
+    const maxPage = Math.ceil(blogs.length / blogsPerPage) || 1;
+    if (blogPage > maxPage) setBlogPage(maxPage);
+  }, [blogs.length, blogPage]);
 
   // Destination Modal Form State
   const [showDestinationModal, setShowDestinationModal] = useState(false);
@@ -789,7 +867,9 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  {packages.map((pkg) => (
+                  {packages.length === 0 ? (
+                    <tr><td colSpan="6" className="p-8 text-center text-slate-500">No packages added yet.</td></tr>
+                  ) : currentPackages.map((pkg) => (
                     <tr key={pkg.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-4 font-bold text-slate-900 flex items-center gap-3">
                         <img src={getImageUrl(pkg.image_url)} alt="" className="w-10 h-10 rounded-xl object-cover shrink-0" />
@@ -829,6 +909,46 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination controls at bottom-right of table */}
+            <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
+              <div className="text-xs text-slate-500 font-medium">
+                Showing <span className="font-semibold text-slate-800">{packages.length > 0 ? packageIndexOfFirstItem + 1 : 0}</span> to <span className="font-semibold text-slate-800">{Math.min(packageIndexOfLastItem, packages.length)}</span> of <span className="font-semibold text-slate-800">{packages.length}</span> packages
+              </div>
+              <div className="flex items-center gap-2 ml-auto">
+                <button
+                  onClick={() => setPackagePage(prev => Math.max(prev - 1, 1))}
+                  disabled={packagePage === 1}
+                  className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center justify-center"
+                  title="Previous Page"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPackagePages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setPackagePage(page)}
+                      className={`w-8 h-8 text-xs font-bold rounded-xl transition-all ${
+                        packagePage === page
+                          ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+                          : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setPackagePage(prev => Math.min(prev + 1, totalPackagePages))}
+                  disabled={packagePage === totalPackagePages || totalPackagePages === 0}
+                  className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center justify-center"
+                  title="Next Page"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -851,7 +971,9 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  {bookings.map((booking) => (
+                  {bookings.length === 0 ? (
+                    <tr><td colSpan="6" className="p-8 text-center text-slate-500">No bookings made yet.</td></tr>
+                  ) : currentBookings.map((booking) => (
                     <tr key={booking.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-4 font-extrabold text-amber-600">{booking.booking_code}</td>
                       <td className="p-4 font-bold text-slate-900">
@@ -877,6 +999,46 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Pagination controls at bottom-right of table */}
+            <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
+              <div className="text-xs text-slate-500 font-medium">
+                Showing <span className="font-semibold text-slate-800">{bookings.length > 0 ? bookingIndexOfFirstItem + 1 : 0}</span> to <span className="font-semibold text-slate-800">{Math.min(bookingIndexOfLastItem, bookings.length)}</span> of <span className="font-semibold text-slate-800">{bookings.length}</span> bookings
+              </div>
+              <div className="flex items-center gap-2 ml-auto">
+                <button
+                  onClick={() => setBookingPage(prev => Math.max(prev - 1, 1))}
+                  disabled={bookingPage === 1}
+                  className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center justify-center"
+                  title="Previous Page"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalBookingPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setBookingPage(page)}
+                      className={`w-8 h-8 text-xs font-bold rounded-xl transition-all ${
+                        bookingPage === page
+                          ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+                          : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setBookingPage(prev => Math.min(prev + 1, totalBookingPages))}
+                  disabled={bookingPage === totalBookingPages || totalBookingPages === 0}
+                  className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center justify-center"
+                  title="Next Page"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -912,7 +1074,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 <tbody className="divide-y divide-slate-200">
                   {coupons.length === 0 ? (
                     <tr><td colSpan="6" className="p-8 text-center text-slate-500">No coupons added yet.</td></tr>
-                  ) : coupons.map((cpn) => (
+                  ) : currentCoupons.map((cpn) => (
                     <tr key={cpn.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-4">
                         {cpn.image_url ? (
@@ -950,6 +1112,46 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination controls at bottom-right of table */}
+            <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
+              <div className="text-xs text-slate-500 font-medium">
+                Showing <span className="font-semibold text-slate-800">{coupons.length > 0 ? couponIndexOfFirstItem + 1 : 0}</span> to <span className="font-semibold text-slate-800">{Math.min(couponIndexOfLastItem, coupons.length)}</span> of <span className="font-semibold text-slate-800">{coupons.length}</span> coupons
+              </div>
+              <div className="flex items-center gap-2 ml-auto">
+                <button
+                  onClick={() => setCouponPage(prev => Math.max(prev - 1, 1))}
+                  disabled={couponPage === 1}
+                  className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center justify-center"
+                  title="Previous Page"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalCouponPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCouponPage(page)}
+                      className={`w-8 h-8 text-xs font-bold rounded-xl transition-all ${
+                        couponPage === page
+                          ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+                          : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setCouponPage(prev => Math.min(prev + 1, totalCouponPages))}
+                  disabled={couponPage === totalCouponPages || totalCouponPages === 0}
+                  className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center justify-center"
+                  title="Next Page"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -983,7 +1185,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 <tbody className="divide-y divide-slate-200">
                   {destinations.length === 0 ? (
                     <tr><td colSpan="5" className="p-8 text-center text-slate-500">No destinations added yet.</td></tr>
-                  ) : destinations.map((dest) => (
+                  ) : currentDestinations.map((dest) => (
                     <tr key={dest.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-4">
                         {dest.image_url ? (
@@ -1019,6 +1221,46 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination controls at bottom-right of table */}
+            <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
+              <div className="text-xs text-slate-500 font-medium">
+                Showing <span className="font-semibold text-slate-800">{destinations.length > 0 ? destinationIndexOfFirstItem + 1 : 0}</span> to <span className="font-semibold text-slate-800">{Math.min(destinationIndexOfLastItem, destinations.length)}</span> of <span className="font-semibold text-slate-800">{destinations.length}</span> destinations
+              </div>
+              <div className="flex items-center gap-2 ml-auto">
+                <button
+                  onClick={() => setDestinationPage(prev => Math.max(prev - 1, 1))}
+                  disabled={destinationPage === 1}
+                  className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center justify-center"
+                  title="Previous Page"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalDestinationPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setDestinationPage(page)}
+                      className={`w-8 h-8 text-xs font-bold rounded-xl transition-all ${
+                        destinationPage === page
+                          ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+                          : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setDestinationPage(prev => Math.min(prev + 1, totalDestinationPages))}
+                  disabled={destinationPage === totalDestinationPages || totalDestinationPages === 0}
+                  className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center justify-center"
+                  title="Next Page"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1052,7 +1294,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 <tbody className="divide-y divide-slate-200">
                   {categories.length === 0 ? (
                     <tr><td colSpan="5" className="p-8 text-center text-slate-500">No categories added yet.</td></tr>
-                  ) : categories.map((cat) => (
+                  ) : currentCategories.map((cat) => (
                     <tr key={cat.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-4">
                         {cat.image_url ? (
@@ -1102,6 +1344,46 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination controls at bottom-right of table */}
+            <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
+              <div className="text-xs text-slate-500 font-medium">
+                Showing <span className="font-semibold text-slate-800">{categories.length > 0 ? categoryIndexOfFirstItem + 1 : 0}</span> to <span className="font-semibold text-slate-800">{Math.min(categoryIndexOfLastItem, categories.length)}</span> of <span className="font-semibold text-slate-800">{categories.length}</span> categories
+              </div>
+              <div className="flex items-center gap-2 ml-auto">
+                <button
+                  onClick={() => setCategoryPage(prev => Math.max(prev - 1, 1))}
+                  disabled={categoryPage === 1}
+                  className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center justify-center"
+                  title="Previous Page"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalCategoryPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCategoryPage(page)}
+                      className={`w-8 h-8 text-xs font-bold rounded-xl transition-all ${
+                        categoryPage === page
+                          ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+                          : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setCategoryPage(prev => Math.min(prev + 1, totalCategoryPages))}
+                  disabled={categoryPage === totalCategoryPages || totalCategoryPages === 0}
+                  className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center justify-center"
+                  title="Next Page"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1135,7 +1417,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 <tbody className="divide-y divide-slate-200">
                   {blogs.length === 0 ? (
                     <tr><td colSpan="5" className="p-8 text-center text-slate-500">No blogs added yet.</td></tr>
-                  ) : blogs.map((blog) => (
+                  ) : currentBlogs.map((blog) => (
                     <tr key={blog.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-4">
                         {blog.image_url ? (
@@ -1161,6 +1443,46 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Pagination controls at bottom-right of table */}
+            <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
+              <div className="text-xs text-slate-500 font-medium">
+                Showing <span className="font-semibold text-slate-800">{blogs.length > 0 ? blogIndexOfFirstItem + 1 : 0}</span> to <span className="font-semibold text-slate-800">{Math.min(blogIndexOfLastItem, blogs.length)}</span> of <span className="font-semibold text-slate-800">{blogs.length}</span> blogs
+              </div>
+              <div className="flex items-center gap-2 ml-auto">
+                <button
+                  onClick={() => setBlogPage(prev => Math.max(prev - 1, 1))}
+                  disabled={blogPage === 1}
+                  className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center justify-center"
+                  title="Previous Page"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalBlogPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setBlogPage(page)}
+                      className={`w-8 h-8 text-xs font-bold rounded-xl transition-all ${
+                        blogPage === page
+                          ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+                          : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setBlogPage(prev => Math.min(prev + 1, totalBlogPages))}
+                  disabled={blogPage === totalBlogPages || totalBlogPages === 0}
+                  className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm flex items-center justify-center"
+                  title="Next Page"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
