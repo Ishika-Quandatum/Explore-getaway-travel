@@ -923,25 +923,27 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     <div className="min-h-screen bg-[#F4F5FB] text-slate-800 py-8 px-4 sm:px-6 lg:px-10 max-w-[1600px] mx-auto space-y-10 animate-fade-in font-sans">
       
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-        <div className="flex items-start gap-4">
-          <button
-            onClick={onGoHome}
-            className="mt-1 p-2.5 rounded-full bg-white text-slate-400 hover:text-slate-700 shadow-sm transition-colors"
-            title="Return to Home"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-              Admin Dashboard
-            </h1>
-            <p className="text-sm text-slate-500 mt-1">
-              Welcome back, Admin. Manage your travel booking platform here.
-            </p>
+      {activeTab === 'overview' && (
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <button
+              onClick={onGoHome}
+              className="mt-1 p-2.5 rounded-full bg-white text-slate-400 hover:text-slate-700 shadow-sm transition-colors"
+              title="Return to Home"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                Admin Dashboard
+              </h1>
+              <p className="text-sm text-slate-500 mt-1">
+                Welcome back, Admin. Manage your travel booking platform here.
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Overview Stat Widgets */}
       {activeTab === 'overview' && stats && (
@@ -1898,20 +1900,25 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
 
       {/* Package Form Modal (Add / Edit) */}
       {showPackageModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6 border border-slate-200 max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setShowPackageModal(false)}
-              className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/40 backdrop-blur-sm flex items-start justify-center p-4 pt-6 sm:pt-10 animate-fade-in">
+          <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200 h-[85vh] max-h-[750px] flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div className="relative px-6 sm:px-8 pt-6 sm:pt-8 pb-6 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowPackageModal(false)}
+                className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors z-10"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <h3 className="text-xl font-extrabold text-slate-900">
+                {editingPackageId ? 'Edit Tour Package' : 'Create New Tour Package'}
+              </h3>
+            </div>
 
-            <h3 className="text-xl font-extrabold text-slate-900">
-              {editingPackageId ? 'Edit Tour Package' : 'Create New Tour Package'}
-            </h3>
-
-            <form onSubmit={handleSavePackage} className="space-y-4 text-xs" ref={pkgFormRef} noValidate>
+            {/* Scrollable Form Body */}
+            <div className="overflow-y-auto scrollbar-none px-6 sm:px-8 pb-6 sm:pb-8 pt-3 flex-1">
+              <form onSubmit={handleSavePackage} className="space-y-4 text-xs" ref={pkgFormRef} noValidate>
               <div data-field="pkg-title">
                 <label className="block text-slate-600 font-bold mb-1">Package Title <span className="text-red-500">*</span></label>
                 <input
@@ -2266,26 +2273,32 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 {editingPackageId ? 'Save Package Changes' : 'Publish New Package'}
               </button>
             </form>
+            </div>
           </div>
         </div>
       )}
 
       {/* Coupon Form Modal (Add / Edit) */}
       {showCouponModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6 border border-slate-200 max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setShowCouponModal(false)}
-              className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/40 backdrop-blur-sm flex items-start justify-center p-4 pt-6 sm:pt-10 animate-fade-in">
+          <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 h-[85vh] max-h-[750px] flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div className="relative px-6 sm:px-8 pt-6 sm:pt-8 pb-6 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowCouponModal(false)}
+                className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors z-10"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <h3 className="text-xl font-extrabold text-slate-900">
+                {editingCouponId ? 'Edit Coupon' : 'Create New Coupon'}
+              </h3>
+            </div>
 
-            <h3 className="text-xl font-extrabold text-slate-900">
-              {editingCouponId ? 'Edit Coupon' : 'Create New Coupon'}
-            </h3>
-
-            <form onSubmit={handleSaveCoupon} className="space-y-4 text-xs" ref={cpnFormRef} noValidate>
+            {/* Scrollable Form Body */}
+            <div className="overflow-y-auto scrollbar-none px-6 sm:px-8 pb-6 sm:pb-8 pt-3 flex-1">
+              <form onSubmit={handleSaveCoupon} className="space-y-4 text-xs" ref={cpnFormRef} noValidate>
               <div data-field="cpn-heading">
                 <label className="block text-slate-600 font-bold mb-1">Heading <span className="text-red-500">*</span></label>
                 <input
@@ -2382,26 +2395,32 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 {editingCouponId ? 'Save Coupon Changes' : 'Create Coupon'}
               </button>
             </form>
+            </div>
           </div>
         </div>
       )}
 
       {/* Category Form Modal (Add / Edit) */}
       {showCategoryModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6 border border-slate-200 max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setShowCategoryModal(false)}
-              className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/40 backdrop-blur-sm flex items-start justify-center p-4 pt-6 sm:pt-10 animate-fade-in">
+          <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 h-[85vh] max-h-[750px] flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div className="relative px-6 sm:px-8 pt-6 sm:pt-8 pb-6 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowCategoryModal(false)}
+                className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors z-10"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <h3 className="text-xl font-extrabold text-slate-900">
+                {editingCategoryId ? 'Edit Category' : 'Create New Category'}
+              </h3>
+            </div>
 
-            <h3 className="text-xl font-extrabold text-slate-900">
-              {editingCategoryId ? 'Edit Category' : 'Create New Category'}
-            </h3>
-
-            <form onSubmit={handleSaveCategory} className="space-y-4 text-xs" ref={catFormRef} noValidate>
+            {/* Scrollable Form Body */}
+            <div className="overflow-y-auto scrollbar-none px-6 sm:px-8 pb-6 sm:pb-8 pt-3 flex-1">
+              <form onSubmit={handleSaveCategory} className="space-y-4 text-xs" ref={catFormRef} noValidate>
               <div data-field="cat-name">
                 <label className="block text-slate-600 font-bold mb-1">Category Name <span className="text-red-500">*</span></label>
                 <input
@@ -2508,26 +2527,32 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 {editingCategoryId ? 'Save Category Changes' : 'Create Category'}
               </button>
             </form>
+            </div>
           </div>
         </div>
       )}
 
       {/* Destination Form Modal (Add / Edit) */}
       {showDestinationModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6 border border-slate-200 max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setShowDestinationModal(false)}
-              className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/40 backdrop-blur-sm flex items-start justify-center p-4 pt-6 sm:pt-10 animate-fade-in">
+          <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 h-[85vh] max-h-[750px] flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div className="relative px-6 sm:px-8 pt-6 sm:pt-8 pb-6 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowDestinationModal(false)}
+                className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors z-10"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <h3 className="text-xl font-extrabold text-slate-900">
+                {editingDestinationId ? 'Edit Destination' : 'Create New Destination'}
+              </h3>
+            </div>
 
-            <h3 className="text-xl font-extrabold text-slate-900">
-              {editingDestinationId ? 'Edit Destination' : 'Create New Destination'}
-            </h3>
-
-            <form onSubmit={handleSaveDestination} className="space-y-4 text-xs" ref={destFormRef} noValidate>
+            {/* Scrollable Form Body */}
+            <div className="overflow-y-auto scrollbar-none px-6 sm:px-8 pb-6 sm:pb-8 pt-3 flex-1">
+              <form onSubmit={handleSaveDestination} className="space-y-4 text-xs" ref={destFormRef} noValidate>
               <div data-field="dest-name">
                 <label className="block text-slate-600 font-bold mb-1">Destination Name <span className="text-red-500">*</span></label>
                 <input
@@ -2620,26 +2645,32 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 {editingDestinationId ? 'Save Destination Changes' : 'Create Destination'}
               </button>
             </form>
+            </div>
           </div>
         </div>
       )}
 
       {/* Blog Form Modal (Add / Edit) */}
       {showBlogModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6 border border-slate-200 max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setShowBlogModal(false)}
-              className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/40 backdrop-blur-sm flex items-start justify-center p-4 pt-6 sm:pt-10 animate-fade-in">
+          <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 h-[85vh] max-h-[750px] flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div className="relative px-6 sm:px-8 pt-6 sm:pt-8 pb-6 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowBlogModal(false)}
+                className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors z-10"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <h3 className="text-xl font-extrabold text-slate-900">
+                {editingBlogId ? 'Edit Blog Article' : 'Create New Blog Article'}
+              </h3>
+            </div>
 
-            <h3 className="text-xl font-extrabold text-slate-900">
-              {editingBlogId ? 'Edit Blog Article' : 'Create New Blog Article'}
-            </h3>
-
-            <form onSubmit={handleSaveBlog} className="space-y-4 text-xs" ref={blogFormRef} noValidate>
+            {/* Scrollable Form Body */}
+            <div className="overflow-y-auto scrollbar-none px-6 sm:px-8 pb-6 sm:pb-8 pt-3 flex-1">
+              <form onSubmit={handleSaveBlog} className="space-y-4 text-xs" ref={blogFormRef} noValidate>
               <div data-field="blog-title">
                 <label className="block text-slate-600 font-bold mb-1">Blog Title <span className="text-red-500">*</span></label>
                 <input
@@ -2733,6 +2764,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 {editingBlogId ? 'Save Blog Changes' : 'Create Blog Article'}
               </button>
             </form>
+            </div>
           </div>
         </div>
       )}
