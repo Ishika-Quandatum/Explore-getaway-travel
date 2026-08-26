@@ -52,7 +52,7 @@ const Header = ({ onOpenAuth, activeSection, setActiveSection, currentView, setC
 
       {/* Main Navigation Header */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <nav className="flex flex-wrap items-center gap-x-8 gap-y-4 pb-4 pt-2">
           
           {/* Logo Frame */}
           <div 
@@ -65,114 +65,128 @@ const Header = ({ onOpenAuth, activeSection, setActiveSection, currentView, setC
           </div>
 
           {/* Desktop Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
-            <button
-              onClick={() => handleNavClick('all', 'home')}
-              className={`py-2 transition-all relative ${
-                currentView === 'home' && activeSection === 'all'
-                  ? 'text-white font-semibold'
-                  : 'text-slate-300 hover:text-white'
-              }`}
-            >
-              Home
-              {currentView === 'home' && activeSection === 'all' && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full" />
-              )}
-            </button>
-
-            <button
-              onClick={() => handleNavClick('ALL', 'packages')}
-              className={`py-2 transition-all relative ${
-                currentView === 'packages'
-                  ? 'text-white font-semibold'
-                  : 'text-slate-300 hover:text-white'
-              }`}
-            >
-              Packages
-              {currentView === 'packages' && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full" />
-              )}
-            </button>
-
-            <button
-              onClick={() => {
-                setCurrentView('destinations');
-                setMobileMenuOpen(false);
-                window.scrollTo(0, 0);
-              }}
-              className={`py-2 transition-all relative ${
-                currentView === 'destinations'
-                  ? 'text-white font-semibold'
-                  : 'text-slate-300 hover:text-white'
-              }`}
-            >
-              Destinations
-              {currentView === 'destinations' && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full" />
-              )}
-            </button>
-
-            <button
-              onClick={() => handleNavClick('Honeymoon', 'packages')}
-              className={`py-2 transition-all relative ${
-                currentView === 'packages' && activeSection.toUpperCase() === 'HONEYMOON'
-                  ? 'text-amber-400 font-semibold'
-                  : 'text-slate-300 hover:text-white'
-              }`}
-            >
-              Honeymoon
-              {currentView === 'packages' && activeSection.toUpperCase() === 'HONEYMOON' && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full" />
-              )}
-            </button>
-
-            <button
-              onClick={() => handleNavClick('Group Tours', 'packages')}
-              className={`py-2 transition-all relative ${
-                currentView === 'packages' && activeSection.toUpperCase() === 'GROUP TOURS'
-                  ? 'text-amber-400 font-semibold'
-                  : 'text-slate-300 hover:text-white'
-              }`}
-            >
-              Group Tours
-              {currentView === 'packages' && activeSection.toUpperCase() === 'GROUP TOURS' && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full" />
-              )}
-            </button>
-
-            <button
-              onClick={() => handleNavClick('blog', 'home')}
-              className={`py-2 transition-all relative ${
-                activeSection === 'blog'
-                  ? 'text-white font-semibold'
-                  : 'text-slate-300 hover:text-white'
-              }`}
-            >
-              Travel Guide
-              {activeSection === 'blog' && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full" />
-              )}
-            </button>
-
-            {isAuthenticated && isAdmin && (
+          <ul className="flex flex-wrap items-center gap-x-7 gap-y-2 text-sm font-medium order-3 lg:order-2 w-full lg:w-auto pt-2 lg:pt-0">
+            <li>
               <button
-                onClick={() => setCurrentView('admin')}
+                onClick={() => handleNavClick('all', 'home')}
                 className={`py-2 transition-all relative ${
-                  currentView === 'admin'
-                    ? 'text-amber-400 font-semibold'
-                    : 'text-slate-300 hover:text-amber-400'
+                  currentView === 'home' && activeSection === 'all'
+                    ? 'text-white font-semibold'
+                    : 'text-slate-300 hover:text-white'
                 }`}
               >
-                Admin
-                {currentView === 'admin' && (
+                Home
+                {currentView === 'home' && activeSection === 'all' && (
                   <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full" />
                 )}
               </button>
+            </li>
+
+            <li>
+              <button
+                onClick={() => handleNavClick('ALL', 'packages')}
+                className={`py-2 transition-all relative ${
+                  currentView === 'packages'
+                    ? 'text-white font-semibold'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                Packages
+                {currentView === 'packages' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full" />
+                )}
+              </button>
+            </li>
+
+            <li>
+              <button
+                onClick={() => {
+                  setCurrentView('destinations');
+                  setMobileMenuOpen(false);
+                  window.scrollTo(0, 0);
+                }}
+                className={`py-2 transition-all relative ${
+                  currentView === 'destinations'
+                    ? 'text-white font-semibold'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                Destinations
+                {currentView === 'destinations' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full" />
+                )}
+              </button>
+            </li>
+
+            <li>
+              <button
+                onClick={() => handleNavClick('Honeymoon', 'packages')}
+                className={`py-2 transition-all relative ${
+                  currentView === 'packages' && activeSection.toUpperCase() === 'HONEYMOON'
+                    ? 'text-amber-400 font-semibold'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                Honeymoon
+                {currentView === 'packages' && activeSection.toUpperCase() === 'HONEYMOON' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full" />
+                )}
+              </button>
+            </li>
+
+            <li>
+              <button
+                onClick={() => handleNavClick('Group Tours', 'packages')}
+                className={`py-2 transition-all relative ${
+                  currentView === 'packages' && activeSection.toUpperCase() === 'GROUP TOURS'
+                    ? 'text-amber-400 font-semibold'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                Group Tours
+                {currentView === 'packages' && activeSection.toUpperCase() === 'GROUP TOURS' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full" />
+                )}
+              </button>
+            </li>
+
+            <li>
+              <button
+                onClick={() => handleNavClick('blog', 'home')}
+                className={`py-2 transition-all relative ${
+                  activeSection === 'blog'
+                    ? 'text-white font-semibold'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                Travel Guide
+                {activeSection === 'blog' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full" />
+                )}
+              </button>
+            </li>
+
+            {isAuthenticated && isAdmin && (
+              <li>
+                <button
+                  onClick={() => setCurrentView('admin')}
+                  className={`py-2 transition-all relative ${
+                    currentView === 'admin'
+                      ? 'text-amber-400 font-semibold'
+                      : 'text-slate-300 hover:text-amber-400'
+                  }`}
+                >
+                  Admin
+                  {currentView === 'admin' && (
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400 rounded-full" />
+                  )}
+                </button>
+              </li>
             )}
-          </nav>
+          </ul>
 
           {/* Right Action / Auth Buttons */}
-          <div className="hidden lg:flex items-center gap-3 relative">
+          <div className="hidden md:flex items-center gap-3 relative ml-auto order-2 lg:order-3">
             <div className="relative">
               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
@@ -290,7 +304,7 @@ const Header = ({ onOpenAuth, activeSection, setActiveSection, currentView, setC
           </div>
 
           {/* Mobile Menu Toggle */}
-          <div className="flex md:hidden items-center">
+          <div className="flex md:hidden items-center ml-auto">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-md bg-slate-800 text-slate-200"
@@ -299,58 +313,70 @@ const Header = ({ onOpenAuth, activeSection, setActiveSection, currentView, setC
             </button>
           </div>
 
-        </div>
+        </nav>
       </div>
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-[#070D1F] border-b border-slate-800 px-4 py-4 space-y-2">
-          <button
-            onClick={() => handleNavClick('all', 'home')}
-            className="w-full text-left px-3 py-2 text-slate-200 hover:text-amber-400 text-sm font-medium"
-          >
-            Home
-          </button>
-          <button
-            onClick={() => handleNavClick('ALL', 'packages')}
-            className="w-full text-left px-3 py-2 text-slate-200 hover:text-amber-400 text-sm font-medium"
-          >
-            Packages
-          </button>
-          <button
-            onClick={() => {
-              setCurrentView('destinations');
-              setMobileMenuOpen(false);
-              window.scrollTo(0, 0);
-            }}
-            className="w-full text-left px-3 py-2 text-slate-200 hover:text-amber-400 text-sm font-medium"
-          >
-            Destinations
-          </button>
-          <button
-            onClick={() => handleNavClick('Honeymoon', 'packages')}
-            className="w-full text-left px-3 py-2 text-slate-200 hover:text-amber-400 text-sm font-medium"
-          >
-            Honeymoon
-          </button>
-          <button
-            onClick={() => handleNavClick('Group Tours', 'packages')}
-            className="w-full text-left px-3 py-2 text-slate-200 hover:text-amber-400 text-sm font-medium"
-          >
-            Group Tours
-          </button>
-          <button
-            onClick={() => handleNavClick('blog', 'home')}
-            className="w-full text-left px-3 py-2 text-slate-200 hover:text-amber-400 text-sm font-medium"
-          >
-            Travel Guide
-          </button>
           {isAuthenticated && isAdmin && (
             <button
               onClick={() => { setCurrentView('admin'); setMobileMenuOpen(false); }}
               className="w-full text-left px-3 py-2 text-amber-400 text-sm font-bold"
             >
               Admin Panel
+            </button>
+          )}
+          {isAuthenticated && (
+            <>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setUserPanelTab('profile');
+                  setCurrentView('user');
+                  window.scrollTo(0, 0);
+                }}
+                className="w-full text-left px-3 py-2 text-slate-200 hover:text-amber-400 text-sm font-medium flex items-center gap-2"
+              >
+                <User className="w-4 h-4 text-amber-400" />
+                <span>My Profile</span>
+              </button>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setUserPanelTab('bookings');
+                  setCurrentView('user');
+                  window.scrollTo(0, 0);
+                }}
+                className="w-full text-left px-3 py-2 text-slate-200 hover:text-amber-400 text-sm font-medium flex items-center gap-2"
+              >
+                <ShoppingBag className="w-4 h-4 text-sky-400" />
+                <span>My Bookings</span>
+              </button>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setUserPanelTab('wishlist');
+                  setCurrentView('user');
+                  window.scrollTo(0, 0);
+                }}
+                className="w-full text-left px-3 py-2 text-slate-200 hover:text-amber-400 text-sm font-medium flex items-center gap-2"
+              >
+                <Heart className="w-4 h-4 text-rose-400" />
+                <span>My Wishlist</span>
+              </button>
+            </>
+          )}
+          {!isAuthenticated && (
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenAuth();
+              }}
+              className="w-full text-left px-3 py-2 text-amber-400 hover:text-amber-300 text-sm font-bold flex items-center gap-2"
+            >
+              <User className="w-4 h-4" />
+              <span>Sign In / Register</span>
             </button>
           )}
           {isAuthenticated && (

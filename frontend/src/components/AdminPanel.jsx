@@ -1991,7 +1991,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 </div>
               </div>
 
-               <div className="grid grid-cols-2 gap-4">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div data-field="pkg-nights">
                     <label className="block text-slate-600 font-bold mb-1">Nights <span className="text-red-500">*</span></label>
@@ -2155,7 +2155,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 <textarea rows="3" placeholder="Detailed overview..." value={pkgOverview} onChange={(e) => setPkgOverview(e.target.value)} className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-amber-500 focus:outline-none" />
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-slate-600 font-bold mb-1">Inclusions (Comma separated)</label>
                   <textarea rows="2" placeholder="Hotels, Breakfast..." value={pkgInclusions} onChange={(e) => setPkgInclusions(e.target.value)} className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-amber-500 focus:outline-none" />
