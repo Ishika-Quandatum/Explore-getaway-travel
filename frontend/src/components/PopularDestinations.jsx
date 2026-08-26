@@ -8,7 +8,7 @@ const PopularDestinations = ({ destinations, onSelectDestination, onViewAllDesti
   const popularDestinations = destinations.slice(0, 14);
 
   return (
-    <section className="mx-auto max-w-7xl px-6 pt-16 pb-4">
+    <section className="mx-auto max-w-7xl px-6 py-12">
       {/* Centered Heading with Decorative Line and Right Aligned View All */}
       <div className="relative text-center">
         <h2 className="text-2xl sm:text-3xl font-serif text-slate-800 tracking-wide font-medium">
@@ -18,11 +18,11 @@ const PopularDestinations = ({ destinations, onSelectDestination, onViewAllDesti
         <div className="absolute right-0 bottom-[-40px] sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 z-10">
           <button
             onClick={onViewAllDestinations}
-            className="inline-flex items-center gap-2 text-xs font-bold tracking-wider text-slate-700 hover:text-amber-500 transition-colors group"
+            className="flex items-center gap-2 text-xs font-semibold text-slate-900 uppercase tracking-wider hover:text-amber-500 transition-colors group cursor-pointer"
           >
             VIEW ALL DESTINATIONS
-            <span className="w-7 h-7 rounded-full border border-slate-300 flex items-center justify-center text-slate-400 group-hover:border-amber-500 group-hover:text-amber-500 transition-colors shrink-0">
-              <ChevronRight className="w-4 h-4" />
+            <span className="grid h-6 w-6 place-items-center rounded-full border border-amber-500 text-amber-500 group-hover:bg-amber-50 transition-colors shrink-0">
+              <ChevronRight className="w-3 h-3" />
             </span>
           </button>
         </div>

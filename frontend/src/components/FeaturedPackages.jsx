@@ -1,6 +1,6 @@
 import React from 'react';
 import PackageCard from './PackageCard';
-import { ArrowRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 const FeaturedPackages = ({
   packages,
@@ -26,18 +26,21 @@ const FeaturedPackages = ({
       
       {/* Section Title & View All */}
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <h2 className="text-3xl sm:text-4xl text-slate-900 font-serif">
-          Featured Tour Packages
-        </h2>
+        <div>
+          <h2 className="text-3xl font-serif text-slate-900 tracking-tight">
+            Featured Tour Packages
+          </h2>
+          <div className="w-12 h-0.5 bg-amber-500 mt-2"></div>
+        </div>
         
         <button 
           onClick={handleViewAll}
-          className="flex items-center gap-2 text-[11px] font-extrabold text-slate-900 uppercase tracking-widest hover:text-amber-500 transition-colors group cursor-pointer"
+          className="flex items-center gap-2 text-xs font-semibold text-slate-900 uppercase tracking-wider hover:text-amber-500 transition-colors group cursor-pointer"
         >
           VIEW ALL PACKAGES
-          <div className="w-6 h-6 rounded-full border border-amber-500 flex items-center justify-center text-amber-500 group-hover:bg-amber-50 transition-colors">
-            <ArrowRight className="w-3 h-3" />
-          </div>
+          <span className="grid h-6 w-6 place-items-center rounded-full border border-amber-500 text-amber-500 group-hover:bg-amber-50 transition-colors shrink-0">
+            <ChevronRight className="w-3 h-3" />
+          </span>
         </button>
       </div>
 

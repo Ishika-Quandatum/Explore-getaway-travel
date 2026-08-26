@@ -142,7 +142,7 @@ export default function PackageDetailsPage({
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-20">
+    <div className="bg-[#FAF7F5] min-h-screen pb-20">
       {/* Hero Banner Section */}
       <div className="relative h-[450px] md:h-[550px] w-full">
         {/* Background Image with Overlay */}

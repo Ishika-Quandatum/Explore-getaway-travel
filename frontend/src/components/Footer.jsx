@@ -18,7 +18,7 @@ const Footer = ({ destinations = [], onSelectDestination, setCurrentView, setAct
   const popularDests = destinations.filter(dest => dest.is_popular);
 
   return (
-    <footer id="contact" className="relative isolate mt-16 overflow-hidden bg-slate-950 text-slate-300">
+    <footer id="contact" className="relative isolate mt-10 overflow-hidden bg-slate-950 text-slate-300">
       {/* Background Image */}
       <img
         src={footerBg}

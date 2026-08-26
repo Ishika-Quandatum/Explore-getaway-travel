@@ -19,7 +19,7 @@ const OfferCoupons = ({ coupons = [], onFilterCategory }) => {
 
   if (activeCoupons.length === 0) {
     return (
-      <section className="pt-14 pb-8 px-6 max-w-7xl mx-auto">
+      <section className="mx-auto max-w-7xl px-6 pt-8">
         <div 
           className="relative rounded-lg overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 h-[260px] sm:h-[240px] shadow-md border border-slate-800/20"
         >
@@ -60,7 +60,7 @@ const OfferCoupons = ({ coupons = [], onFilterCategory }) => {
   const bgImage = currentCoupon.image_url ? getImageUrl(currentCoupon.image_url) : '';
 
   return (
-    <section className="pt-14 pb-8 px-6 max-w-7xl mx-auto">
+    <section className="mx-auto max-w-7xl px-6 pt-8">
       <div 
         className="relative rounded-lg overflow-hidden bg-slate-900 bg-cover bg-center h-[260px] sm:h-[240px] shadow-md border border-slate-800/10 transition-all duration-700 ease-in-out"
         style={bgImage ? { backgroundImage: `url('${bgImage}')` } : {}}

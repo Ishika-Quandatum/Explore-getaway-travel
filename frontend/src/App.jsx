@@ -202,7 +202,7 @@ const MainApp = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans">
+    <div className="min-h-screen flex flex-col bg-[#FAF7F5] text-slate-900 font-sans">
       
       {/* Toast Notification */}
       {toastMsg && (

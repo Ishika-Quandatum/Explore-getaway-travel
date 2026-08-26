@@ -170,7 +170,7 @@ const PackagesPage = ({
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 pb-20">
+    <div className="min-h-screen bg-[#FAF7F5] text-slate-900 pb-20">
       
       {/* Conditionally Render Destination Header Banner or Default Explore Banner */}
       {activeDestObj ? (

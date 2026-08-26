@@ -46,7 +46,7 @@ const CuratedCollections = ({ categories = [], onFilterCategory }) => {
   if (!categories || categories.length === 0) return null;
 
   return (
-    <section className="mx-auto max-w-7xl px-6 pt-16">
+    <section className="mx-auto max-w-7xl px-6 pt-16 pb-8">
       <div
         className="relative"
         onMouseEnter={pauseAutoPlay}
