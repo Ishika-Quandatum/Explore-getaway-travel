@@ -41,7 +41,7 @@ const OfferCoupons = ({ coupons = [], onFilterCategory }) => {
             <div className="flex flex-col items-center sm:items-start md:items-end gap-4 shrink-0">
               <button
                 onClick={() => {
-                  const el = document.getElementById('packages-section');
+                  const el = document.getElementById('packages-section') || document.getElementById('packages');
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }}
                 className="px-6 py-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2"

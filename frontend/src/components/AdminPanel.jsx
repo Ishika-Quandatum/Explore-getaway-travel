@@ -962,7 +962,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
 
       {/* Overview Stat Widgets */}
       {activeTab === 'overview' && stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           
           <div className="p-6 rounded-2xl bg-white shadow-sm flex items-center justify-between">
             <div>
@@ -991,16 +991,6 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
             </div>
             <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
               <Activity className="w-5 h-5" />
-            </div>
-          </div>
-
-          <div className="p-6 rounded-2xl bg-white shadow-sm flex items-center justify-between">
-            <div>
-              <div className="text-2xl font-extrabold text-slate-900">{stats.confirmed_bookings}</div>
-              <div className="text-xs text-slate-500 font-medium mt-1">Transactions</div>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center">
-              <CreditCard className="w-5 h-5" />
             </div>
           </div>
 

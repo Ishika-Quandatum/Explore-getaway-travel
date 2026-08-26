@@ -2,7 +2,7 @@ import React from 'react';
 import { MapPin, ChevronRight } from 'lucide-react';
 import { getImageUrl } from '../api/axios';
 
-const PopularDestinations = ({ destinations, onSelectCategory, onViewAllDestinations }) => {
+const PopularDestinations = ({ destinations, onSelectDestination, onViewAllDestinations }) => {
   // If there are more than 14 destinations in the backend, show only the first 14.
   // If there are 14 or fewer destinations, display all available destinations.
   const popularDestinations = destinations.slice(0, 14);
@@ -38,7 +38,7 @@ const PopularDestinations = ({ destinations, onSelectCategory, onViewAllDestinat
           {popularDestinations.map((dest) => (
             <div
               key={dest.id}
-              onClick={() => onSelectCategory(dest.name)}
+              onClick={() => onSelectDestination(dest.name)}
               className="group relative block h-44 overflow-hidden rounded-sm shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1.5 cursor-pointer"
             >
               {dest.image_url ? (

@@ -54,7 +54,7 @@ const HeroSection = ({ onSearch, onContactUs }) => {
   const slide = heroSlides[currentSlide];
 
   const handleExploreClick = () => {
-    const el = document.getElementById('packages-section');
+    const el = document.getElementById('packages-section') || document.getElementById('packages');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     }

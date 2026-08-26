@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PackageCard from './PackageCard';
-import { Filter } from 'lucide-react';
+import { Filter, ArrowLeft } from 'lucide-react';
+import { getImageUrl } from '../api/axios';
 
 const PackagesPage = ({
   packages = [],
@@ -11,6 +12,9 @@ const PackagesPage = ({
   onSelectPackage,
   wishlist = [],
   onWishlistToggle,
+  initialDestination = 'All destinations',
+  backButtonText = 'Back to Destinations',
+  onGoBack,
 }) => {
   const [activeCategory, setActiveCategory] = useState(selectedCategory || 'ALL');
   const [selectedDestination, setSelectedDestination] = useState('All destinations');
@@ -20,6 +24,12 @@ const PackagesPage = ({
       setActiveCategory(selectedCategory);
     }
   }, [selectedCategory]);
+
+  useEffect(() => {
+    if (initialDestination) {
+      setSelectedDestination(initialDestination);
+    }
+  }, [initialDestination]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -155,23 +165,81 @@ const PackagesPage = ({
     return `${formatted} Packages`;
   };
 
+  const activeDestObj = destinations.find(
+    d => d && d.name && d.name.toLowerCase() === selectedDestination.toLowerCase()
+  );
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-20">
       
-      {/* Dark Hero Banner */}
-      <div className="bg-[#0B132B] text-white py-12 px-4 sm:px-6 lg:px-8 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto space-y-2">
-          <p className="text-amber-400 text-xs font-extrabold tracking-widest uppercase">
-            EXPLORE
-          </p>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-white font-normal tracking-tight">
-            {getPageTitle()}
-          </h1>
-          <p className="text-slate-300 text-sm sm:text-base max-w-2xl font-light pt-1">
-            {filteredPackages.length} handcrafted itineraries with day-wise plans, transparent inclusions and flexible sharing options.
-          </p>
+      {/* Conditionally Render Destination Header Banner or Default Explore Banner */}
+      {activeDestObj ? (
+        <div className="relative min-h-[35vh] flex items-center justify-start py-14 px-4 sm:px-6 lg:px-8 border-b border-slate-800 bg-slate-950 overflow-hidden">
+          {/* Background Image with Dark Vignette Gradient */}
+          <div className="absolute inset-0 z-0">
+            {activeDestObj.image_url ? (
+              <img
+                src={getImageUrl(activeDestObj.image_url)}
+                alt={activeDestObj.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-slate-800" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/70 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/30" />
+          </div>
+
+          <div className="relative z-10 w-full max-w-7xl mx-auto space-y-3 text-left">
+            {onGoBack && (
+              <button
+                onClick={onGoBack}
+                className="inline-flex items-center gap-2 text-xs font-bold text-slate-300 hover:text-amber-400 transition-colors mb-1 cursor-pointer group"
+              >
+                <ArrowLeft className="w-4 h-4 text-amber-400 transition-transform group-hover:-translate-x-1" />
+                <span>{backButtonText}</span>
+              </button>
+            )}
+            <p className="text-amber-400 text-xs font-extrabold tracking-widest uppercase">
+              DESTINATION
+            </p>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-white font-normal tracking-tight">
+              {activeDestObj.name}
+            </h1>
+            {activeDestObj.subtitle && (
+              <p className="text-amber-300/90 text-sm font-medium tracking-wide">
+                {activeDestObj.subtitle}
+              </p>
+            )}
+            <p className="text-slate-200 text-sm sm:text-base max-w-2xl font-light leading-relaxed">
+              {activeDestObj.description || `Explore our handpicked travel packages for ${activeDestObj.name}.`}
+            </p>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="bg-[#0B132B] text-white py-12 px-4 sm:px-6 lg:px-8 border-b border-slate-800">
+          <div className="max-w-7xl mx-auto space-y-2">
+            {onGoBack && (
+              <button
+                onClick={onGoBack}
+                className="inline-flex items-center gap-2 text-xs font-bold text-slate-300 hover:text-amber-400 transition-colors mb-2 cursor-pointer group"
+              >
+                <ArrowLeft className="w-4 h-4 text-amber-400 transition-transform group-hover:-translate-x-1" />
+                <span>{backButtonText}</span>
+              </button>
+            )}
+            <p className="text-amber-400 text-xs font-extrabold tracking-widest uppercase">
+              EXPLORE
+            </p>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-white font-normal tracking-tight">
+              {getPageTitle()}
+            </h1>
+            <p className="text-slate-300 text-sm sm:text-base max-w-2xl font-light pt-1">
+              {filteredPackages.length} handcrafted itineraries with day-wise plans, transparent inclusions and flexible sharing options.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">

@@ -106,17 +106,17 @@ const Footer = ({ destinations = [], onSelectDestination, setCurrentView, setAct
             <h4 className="text-white font-bold text-sm">Quick Links</h4>
             <ul className="space-y-2 text-slate-300">
               <li>
-                <button onClick={() => { setCurrentView('home'); setActiveSection('all'); }} className="hover:text-amber-400 transition-colors">
+                <button onClick={() => { setCurrentView('home'); setActiveSection('all'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-amber-400 transition-colors">
                   Home
                 </button>
               </li>
               <li>
-                <button onClick={() => { setCurrentView('home'); setActiveSection('packages'); }} className="hover:text-amber-400 transition-colors">
+                <button onClick={() => { setCurrentView('packages'); setActiveSection('ALL'); window.scrollTo(0, 0); }} className="hover:text-amber-400 transition-colors">
                   Packages
                 </button>
               </li>
               <li>
-                <button onClick={() => { setCurrentView('home'); setActiveSection('blog'); }} className="hover:text-amber-400 transition-colors">
+                <button onClick={() => { setCurrentView('blogs'); window.scrollTo(0, 0); }} className="hover:text-amber-400 transition-colors">
                   Travel Guide
                 </button>
               </li>
@@ -165,7 +165,6 @@ const Footer = ({ destinations = [], onSelectDestination, setCurrentView, setAct
             <ul className="space-y-2 text-slate-300">
               <li><a href="#" className="hover:text-amber-400 transition-colors">FAQ's</a></li>
               <li><a href="#" className="hover:text-amber-400 transition-colors">Payment Policy</a></li>
-              <li><a href="#" className="hover:text-amber-400 transition-colors">Cancellation Policy</a></li>
               <li><a href="#" className="hover:text-amber-400 transition-colors">Terms &amp; Conditions</a></li>
               <li><a href="#" className="hover:text-amber-400 transition-colors">Privacy Policy</a></li>
             </ul>

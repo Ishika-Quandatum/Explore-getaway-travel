@@ -2,12 +2,27 @@ import React from 'react';
 import PackageCard from './PackageCard';
 import { ArrowRight } from 'lucide-react';
 
-const FeaturedPackages = ({ packages, onSelectPackage, wishlist = [], onWishlistToggle }) => {
+const FeaturedPackages = ({
+  packages,
+  onSelectPackage,
+  wishlist = [],
+  onWishlistToggle,
+  onViewAllPackages,
+}) => {
   // Let's just show top 8 packages to match a "Featured" section look.
   const featuredPackages = packages.slice(0, 8);
 
+  const handleViewAll = () => {
+    if (onViewAllPackages) {
+      onViewAllPackages();
+    } else {
+      const el = document.getElementById('packages-section') || document.getElementById('packages');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
-    <section id="packages" className="scroll-mt-28 mx-auto max-w-7xl px-6 pt-16">
+    <section id="packages-section" className="scroll-mt-28 mx-auto max-w-7xl px-6 pt-16">
       
       {/* Section Title & View All */}
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -16,11 +31,8 @@ const FeaturedPackages = ({ packages, onSelectPackage, wishlist = [], onWishlist
         </h2>
         
         <button 
-          onClick={() => {
-            const el = document.getElementById('packages');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }}
-          className="flex items-center gap-2 text-[11px] font-extrabold text-slate-900 uppercase tracking-widest hover:text-amber-500 transition-colors group"
+          onClick={handleViewAll}
+          className="flex items-center gap-2 text-[11px] font-extrabold text-slate-900 uppercase tracking-widest hover:text-amber-500 transition-colors group cursor-pointer"
         >
           VIEW ALL PACKAGES
           <div className="w-6 h-6 rounded-full border border-amber-500 flex items-center justify-center text-amber-500 group-hover:bg-amber-50 transition-colors">

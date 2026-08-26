@@ -17,7 +17,7 @@ const Header = ({ onOpenAuth, activeSection, setActiveSection, currentView, setC
     if (view === 'home') {
       setTimeout(() => {
         if (section === 'packages') {
-          const el = document.getElementById('packages');
+          const el = document.getElementById('packages-section') || document.getElementById('packages');
           if (el) {
             el.scrollIntoView({ behavior: 'smooth' });
           }

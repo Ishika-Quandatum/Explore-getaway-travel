@@ -28,6 +28,8 @@ const MainApp = () => {
   const [currentView, setCurrentView] = useState('home'); // 'home', 'user', 'admin'
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDestination, setSelectedDestination] = useState('All destinations');
+  const [packagesBackOrigin, setPackagesBackOrigin] = useState('destinations');
 
   // Data State
   const [packages, setPackages] = useState([]);
@@ -119,25 +121,24 @@ const MainApp = () => {
     if (type) setActiveCategory(type);
     
     // Smooth scroll to packages section
-    const el = document.getElementById('packages-section');
+    const el = document.getElementById('packages-section') || document.getElementById('packages');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
   const handleSelectDestination = (destinationName) => {
-    setSearchQuery(destinationName);
-    setActiveCategory('all');
-    setCurrentView('home');
-    const el = document.getElementById('packages-section');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+    setSelectedDestination(destinationName);
+    setActiveCategory('ALL');
+    setPackagesBackOrigin('destinations');
+    setCurrentView('packages');
+    window.scrollTo(0, 0);
   };
 
   const handleFilterCategory = (catName) => {
     setActiveCategory(catName);
     setSearchQuery('');
+    setPackagesBackOrigin('home');
     setCurrentView('packages');
     window.scrollTo(0, 0);
   };
@@ -188,7 +189,7 @@ const MainApp = () => {
 
             <PopularDestinations
               destinations={destinations}
-              onSelectCategory={handleFilterCategory}
+              onSelectDestination={handleSelectDestination}
               onViewAllDestinations={() => {
                 setCurrentView('destinations');
                 window.scrollTo(0, 0);
@@ -202,6 +203,13 @@ const MainApp = () => {
               categories={categories}
               selectedCategory={activeCategory}
               onSelectCategory={setActiveCategory}
+              onViewAllPackages={() => {
+                setSelectedDestination('All destinations');
+                setActiveCategory('ALL');
+                setPackagesBackOrigin('featured');
+                setCurrentView('packages');
+                window.scrollTo(0, 0);
+              }}
               onSelectPackage={(pkg) => {
                 setSelectedPackage(pkg);
                 setCurrentView('package-details');
@@ -241,7 +249,7 @@ const MainApp = () => {
               onGoHome={() => setCurrentView('home')}
               onBrowsePackages={() => {
                 setCurrentView('home');
-                const el = document.getElementById('packages-section');
+                const el = document.getElementById('packages-section') || document.getElementById('packages');
                 if (el) el.scrollIntoView({ behavior: 'smooth' });
               }}
               onSelectPackage={(pkg) => {
@@ -306,6 +314,29 @@ const MainApp = () => {
             destinations={destinations}
             selectedCategory={activeCategory}
             onSelectCategory={setActiveCategory}
+            initialDestination={selectedDestination}
+            backButtonText={
+              packagesBackOrigin === 'featured'
+                ? 'Back to Featured Tour Packages'
+                : packagesBackOrigin === 'destinations'
+                ? 'Back to Destinations'
+                : 'Back to Home'
+            }
+            onGoBack={() => {
+              if (packagesBackOrigin === 'featured') {
+                setCurrentView('home');
+                setTimeout(() => {
+                  const el = document.getElementById('packages-section') || document.getElementById('packages');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+              } else if (packagesBackOrigin === 'destinations') {
+                setCurrentView('destinations');
+                window.scrollTo(0, 0);
+              } else {
+                setCurrentView('home');
+                window.scrollTo(0, 0);
+              }
+            }}
             onSelectPackage={(pkg) => {
               setSelectedPackage(pkg);
               setCurrentView('package-details');
@@ -362,7 +393,7 @@ const MainApp = () => {
               } else if (action === 'home-packages') {
                 setCurrentView('home');
                 setTimeout(() => {
-                  const el = document.getElementById('packages-section');
+                  const el = document.getElementById('packages-section') || document.getElementById('packages');
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }, 100);
               } else if (action === 'switch' && payload) {
