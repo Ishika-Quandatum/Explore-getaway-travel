@@ -28,7 +28,7 @@ const Footer = ({ destinations = [], onSelectDestination, setCurrentView, setAct
         className="absolute inset-0 -z-10 h-full w-full object-cover opacity-20"
       />
 
-      <div className="mx-auto max-w-7xl px-6 py-14">
+      <div className="mx-auto max-w-7xl px-6 pt-14 pb-6">
 
         {/* ── Newsletter Banner ── */}
         <div className="grid gap-8 border-b border-navy-foreground/15 pb-10 md:grid-cols-2">

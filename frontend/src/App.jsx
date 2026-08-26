@@ -127,6 +127,49 @@ const MainApp = () => {
     }
   };
 
+  const handleSetCurrentView = (newView) => {
+    if (newView === 'packages' && currentView !== 'packages') {
+      setPackagesBackOrigin(currentView || 'home');
+    }
+    setCurrentView(newView);
+  };
+
+  const getPackagesBackButtonText = () => {
+    switch (packagesBackOrigin) {
+      case 'featured':
+        return 'Back to Featured Tour Packages';
+      case 'destinations':
+        return 'Back to Destinations';
+      case 'blogs':
+        return 'Back to Travel Guide';
+      case 'contact':
+        return 'Back to Contact Us';
+      case 'user':
+        return 'Back to Dashboard';
+      case 'admin':
+        return 'Back to Admin Panel';
+      case 'home':
+      default:
+        return 'Back to Home';
+    }
+  };
+
+  const handleGoBackFromPackages = () => {
+    if (packagesBackOrigin === 'featured') {
+      setCurrentView('home');
+      setTimeout(() => {
+        const el = document.getElementById('packages-section') || document.getElementById('packages');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else if (['destinations', 'blogs', 'contact', 'user', 'admin', 'home'].includes(packagesBackOrigin)) {
+      setCurrentView(packagesBackOrigin);
+      window.scrollTo(0, 0);
+    } else {
+      setCurrentView('home');
+      window.scrollTo(0, 0);
+    }
+  };
+
   const handleSelectDestination = (destinationName) => {
     setSelectedDestination(destinationName);
     setActiveCategory('ALL');
@@ -138,7 +181,7 @@ const MainApp = () => {
   const handleFilterCategory = (catName) => {
     setActiveCategory(catName);
     setSearchQuery('');
-    setPackagesBackOrigin('home');
+    setPackagesBackOrigin(currentView === 'packages' ? packagesBackOrigin : (currentView || 'home'));
     setCurrentView('packages');
     window.scrollTo(0, 0);
   };
@@ -175,7 +218,7 @@ const MainApp = () => {
         activeSection={activeCategory}
         setActiveSection={setActiveCategory}
         currentView={currentView}
-        setCurrentView={setCurrentView}
+        setCurrentView={handleSetCurrentView}
         setUserPanelTab={setUserPanelTab}
       />
 
@@ -295,6 +338,19 @@ const MainApp = () => {
               setCurrentView('home');
               setSelectedPackage(null);
             }}
+            onGoHome={() => {
+              setCurrentView('home');
+              setSelectedPackage(null);
+              window.scrollTo(0, 0);
+            }}
+            onGoToPackages={() => {
+              setSelectedDestination('All destinations');
+              setActiveCategory('ALL');
+              setPackagesBackOrigin('home');
+              setCurrentView('packages');
+              setSelectedPackage(null);
+              window.scrollTo(0, 0);
+            }}
             onBookingSuccess={handleBookingSuccess}
             onRequireAuth={() => setShowAuthModal(true)}
             isAuthenticated={isAuthenticated}
@@ -315,28 +371,8 @@ const MainApp = () => {
             selectedCategory={activeCategory}
             onSelectCategory={setActiveCategory}
             initialDestination={selectedDestination}
-            backButtonText={
-              packagesBackOrigin === 'featured'
-                ? 'Back to Featured Tour Packages'
-                : packagesBackOrigin === 'destinations'
-                ? 'Back to Destinations'
-                : 'Back to Home'
-            }
-            onGoBack={() => {
-              if (packagesBackOrigin === 'featured') {
-                setCurrentView('home');
-                setTimeout(() => {
-                  const el = document.getElementById('packages-section') || document.getElementById('packages');
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
-              } else if (packagesBackOrigin === 'destinations') {
-                setCurrentView('destinations');
-                window.scrollTo(0, 0);
-              } else {
-                setCurrentView('home');
-                window.scrollTo(0, 0);
-              }
-            }}
+            backButtonText={getPackagesBackButtonText()}
+            onGoBack={handleGoBackFromPackages}
             onSelectPackage={(pkg) => {
               setSelectedPackage(pkg);
               setCurrentView('package-details');
@@ -414,7 +450,7 @@ const MainApp = () => {
         <Footer
           destinations={destinations}
           onSelectDestination={handleSelectDestination}
-          setCurrentView={setCurrentView}
+          setCurrentView={handleSetCurrentView}
           setActiveSection={setActiveCategory}
         />
       )}

@@ -6,7 +6,15 @@ import {
 } from 'lucide-react';
 import api, { getImageUrl } from '../api/axios';
 
-export default function PackageDetailsPage({ packageItem, onGoBack, onBookingSuccess, onRequireAuth, isAuthenticated }) {
+export default function PackageDetailsPage({ 
+  packageItem, 
+  onGoBack, 
+  onGoHome,
+  onGoToPackages,
+  onBookingSuccess, 
+  onRequireAuth, 
+  isAuthenticated 
+}) {
   const [activeTab, setActiveTab] = useState('overview');
   const [expandedDays, setExpandedDays] = useState([1]); // Day 1 expanded by default
   const [adults, setAdults] = useState(2);
@@ -151,9 +159,19 @@ export default function PackageDetailsPage({ packageItem, onGoBack, onBookingSuc
         <div className="relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-end pb-12">
           {/* Breadcrumbs */}
           <div className="flex items-center text-slate-300 text-sm mb-4 space-x-2">
-            <button onClick={onGoBack} className="hover:text-white transition-colors">Home</button>
+            <button 
+              onClick={onGoHome || onGoBack} 
+              className="hover:text-white transition-colors cursor-pointer"
+            >
+              Home
+            </button>
             <ChevronRight className="w-3 h-3" />
-            <button onClick={onGoBack} className="hover:text-white transition-colors">Packages</button>
+            <button 
+              onClick={onGoToPackages || onGoBack} 
+              className="hover:text-white transition-colors cursor-pointer"
+            >
+              Packages
+            </button>
             <ChevronRight className="w-3 h-3" />
             <span className="text-amber-400">{packageItem.title}</span>
           </div>
