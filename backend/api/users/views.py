@@ -104,3 +104,56 @@ def admin_users_detail(request, pk):
     elif request.method == 'DELETE':
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def contact_form_view(request):
+    """
+    Function-based view for handling contact form submission and sending an email.
+    """
+    from django.core.mail import send_mail
+    from django.conf import settings
+
+    full_name = request.data.get('full_name')
+    email = request.data.get('email')
+    phone_number = request.data.get('phone_number')
+    subject = request.data.get('subject')
+    message = request.data.get('message')
+
+    if not all([full_name, email, subject, message]):
+        return Response(
+            {"error": "Please fill in all required fields (Full Name, Email, Subject, Message)."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Construct email details
+    email_subject = f"Contact Form Submission: {subject}"
+    email_body = f"""You have received a new contact form submission:
+
+Full Name: {full_name}
+Email Address: {email}
+Phone Number: {phone_number or 'Not provided'}
+Subject: {subject}
+
+Message:
+{message}"""
+
+    recipient_list = [getattr(settings, 'COMPANY_EMAIL', 'info@example.com')]
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@example.com')
+
+    try:
+        send_mail(
+            subject=email_subject,
+            message=email_body,
+            from_email=from_email,
+            recipient_list=recipient_list,
+            fail_silently=False,
+        )
+        return Response({"success": "Your message has been sent successfully."}, status=status.HTTP_200_OK)
+    except Exception as e:
+        print(f"Error sending email: {e}")
+        return Response(
+            {"error": "Failed to send email. Please try again later."},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

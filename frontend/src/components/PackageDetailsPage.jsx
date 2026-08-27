@@ -67,15 +67,89 @@ export default function PackageDetailsPage({
 
   const collapseAll = () => setExpandedDays([]);
 
-  // Calculate prices
-  const basePrice = Number(packageItem.price_per_person) || 0;
-  const doubleSharingPrice = packageItem.double_sharing ? Number(packageItem.double_sharing) : basePrice;
-  const tripleSharingPrice = packageItem.triple_sharing ? Number(packageItem.triple_sharing) : basePrice;
+  const isValidPrice = (val) => {
+    if (val === undefined || val === null || val === '') return false;
+    const num = Number(val);
+    return !isNaN(num) && num > 0;
+  };
+
+  const singlePriceRaw = packageItem.price_per_person ?? packageItem.single_price ?? packageItem.single;
+  const doublePriceRaw = packageItem.double_sharing ?? packageItem.double_price ?? packageItem.double;
+  const triplePriceRaw = packageItem.triple_sharing ?? packageItem.triple_price ?? packageItem.triple;
+
+  const isSingleAvailable = isValidPrice(singlePriceRaw);
+  const isDoubleAvailable = isValidPrice(doublePriceRaw);
+  const isTripleAvailable = isValidPrice(triplePriceRaw);
+
+  const singlePrice = isSingleAvailable ? Number(singlePriceRaw) : null;
+  const doublePrice = isDoubleAvailable ? Number(doublePriceRaw) : null;
+  const triplePrice = isTripleAvailable ? Number(triplePriceRaw) : null;
+
+  const getFirstAvailableSharingType = (item) => {
+    if (!item) return 'single';
+    if (isValidPrice(item.price_per_person ?? item.single_price ?? item.single)) return 'single';
+    if (isValidPrice(item.double_sharing ?? item.double_price ?? item.double)) return 'double';
+    if (isValidPrice(item.triple_sharing ?? item.triple_price ?? item.triple)) return 'triple';
+    return 'single';
+  };
+
+  useEffect(() => {
+    setSharingType(getFirstAvailableSharingType(packageItem));
+  }, [packageItem]);
+
+  // Dynamic Starting From price calculation based on priority:
+  // 1. Triple price -> 2. Double price -> 3. Single price -> 4. Fallback (0)
+  const getStartingFromPrice = (pkg) => {
+    if (!pkg) return 0;
+    const tripleVal = pkg.triple_price ?? pkg.triple_sharing ?? pkg.triple;
+    if (isValidPrice(tripleVal)) return Number(tripleVal);
+
+    const doubleVal = pkg.double_price ?? pkg.double_sharing ?? pkg.double;
+    if (isValidPrice(doubleVal)) return Number(doubleVal);
+
+    const singleVal = pkg.single_price ?? pkg.price_per_person ?? pkg.single ?? pkg.price;
+    if (isValidPrice(singleVal)) return Number(singleVal);
+
+    return 0;
+  };
+
+  const startingFromPrice = getStartingFromPrice(packageItem);
   
   const getPriceBySharing = () => {
-    if (sharingType === 'single') return basePrice;
-    if (sharingType === 'triple') return tripleSharingPrice;
-    return doubleSharingPrice;
+    if (sharingType === 'single' && isSingleAvailable) return singlePrice;
+    if (sharingType === 'double' && isDoubleAvailable) return doublePrice;
+    if (sharingType === 'triple' && isTripleAvailable) return triplePrice;
+    return 0;
+  };
+
+  const handleSelectSharingType = (type) => {
+    let available = false;
+    let label = '';
+    if (type === 'single') {
+      available = isSingleAvailable;
+      label = 'Single';
+    } else if (type === 'double') {
+      available = isDoubleAvailable;
+      label = 'Double';
+    } else if (type === 'triple') {
+      available = isTripleAvailable;
+      label = 'Triple';
+    }
+
+    if (!available) {
+      setFormErrors(prev => ({
+        ...prev,
+        sharing: `${label} sharing amount is not allocated for this package. Please select another sharing type`
+      }));
+      return;
+    }
+
+    setFormErrors(prev => {
+      const copy = { ...prev };
+      delete copy.sharing;
+      return copy;
+    });
+    setSharingType(type);
   };
   
   const currentPrice = getPriceBySharing();
@@ -94,6 +168,16 @@ export default function PackageDetailsPage({
     if (!selectedDate) errors.date = 'Please select a travel date to proceed.';
     if (!customerName) errors.name = 'Please provide your name.';
     if (!customerMobile || customerMobile.length < 10) errors.mobile = 'Please enter a valid phone number.';
+    
+    let sharingAvailable = false;
+    let sharingLabel = '';
+    if (sharingType === 'single') { sharingAvailable = isSingleAvailable; sharingLabel = 'Single'; }
+    else if (sharingType === 'double') { sharingAvailable = isDoubleAvailable; sharingLabel = 'Double'; }
+    else if (sharingType === 'triple') { sharingAvailable = isTripleAvailable; sharingLabel = 'Triple'; }
+
+    if (!sharingAvailable) {
+      errors.sharing = `${sharingLabel} sharing amount is not allocated for this package. Please select another sharing type`;
+    }
     
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -220,7 +304,7 @@ export default function PackageDetailsPage({
               </p>
               
               {/* Quick Info Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
                   <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">Duration</p>
                   <p className="font-bold text-slate-900">{packageItem.duration_nights}N / {packageItem.duration_days}D</p>
@@ -233,6 +317,12 @@ export default function PackageDetailsPage({
                   <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">Best For</p>
                   <p className="font-bold text-slate-900 truncate">
                     {packageItem.highlights?.join(', ') || packageItem.category_details?.display_label || 'Everyone'}
+                  </p>
+                </div>
+                <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
+                  <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">Starting From</p>
+                  <p className="font-bold text-slate-900">
+                    ₹{startingFromPrice.toLocaleString('en-IN')}
                   </p>
                 </div>
               </div>
@@ -515,27 +605,62 @@ export default function PackageDetailsPage({
                   </label>
                   <div className="flex border border-slate-200 rounded-lg overflow-hidden">
                     <button 
-                      onClick={() => setSharingType('single')}
-                      className={`flex-1 py-2 flex flex-col items-center justify-center transition-colors ${sharingType === 'single' ? 'bg-amber-500 text-white' : 'bg-white text-slate-600 hover:bg-slate-50 border-r border-slate-200'}`}
+                      type="button"
+                      onClick={() => handleSelectSharingType('single')}
+                      className={`flex-1 py-2 flex flex-col items-center justify-center transition-colors border-r border-slate-200 ${
+                        !isSingleAvailable
+                          ? 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-60'
+                          : sharingType === 'single'
+                            ? 'bg-amber-500 text-white cursor-pointer'
+                            : 'bg-white text-slate-600 hover:bg-slate-50 cursor-pointer'
+                      }`}
                     >
                       <span className="text-xs font-bold">Single</span>
-                      <span className="text-[10px] opacity-80">₹{basePrice.toLocaleString('en-IN')}</span>
+                      <span className="text-[10px] opacity-80">
+                        {isSingleAvailable ? `₹${singlePrice.toLocaleString('en-IN')}` : 'Unavailable'}
+                      </span>
                     </button>
+
                     <button 
-                      onClick={() => setSharingType('double')}
-                      className={`flex-1 py-2 flex flex-col items-center justify-center transition-colors ${sharingType === 'double' ? 'bg-amber-500 text-white' : 'bg-white text-slate-600 hover:bg-slate-50 border-r border-slate-200'}`}
+                      type="button"
+                      onClick={() => handleSelectSharingType('double')}
+                      className={`flex-1 py-2 flex flex-col items-center justify-center transition-colors border-r border-slate-200 ${
+                        !isDoubleAvailable
+                          ? 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-60'
+                          : sharingType === 'double'
+                            ? 'bg-amber-500 text-white cursor-pointer'
+                            : 'bg-white text-slate-600 hover:bg-slate-50 cursor-pointer'
+                      }`}
                     >
                       <span className="text-xs font-bold">Double</span>
-                      <span className="text-[10px] opacity-80">₹{doubleSharingPrice.toLocaleString('en-IN')}</span>
+                      <span className="text-[10px] opacity-80">
+                        {isDoubleAvailable ? `₹${doublePrice.toLocaleString('en-IN')}` : 'Unavailable'}
+                      </span>
                     </button>
+
                     <button 
-                      onClick={() => setSharingType('triple')}
-                      className={`flex-1 py-2 flex flex-col items-center justify-center transition-colors ${sharingType === 'triple' ? 'bg-amber-500 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
+                      type="button"
+                      onClick={() => handleSelectSharingType('triple')}
+                      className={`flex-1 py-2 flex flex-col items-center justify-center transition-colors ${
+                        !isTripleAvailable
+                          ? 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-60'
+                          : sharingType === 'triple'
+                            ? 'bg-amber-500 text-white cursor-pointer'
+                            : 'bg-white text-slate-600 hover:bg-slate-50 cursor-pointer'
+                      }`}
                     >
                       <span className="text-xs font-bold">Triple</span>
-                      <span className="text-[10px] opacity-80">₹{tripleSharingPrice.toLocaleString('en-IN')}</span>
+                      <span className="text-[10px] opacity-80">
+                        {isTripleAvailable ? `₹${triplePrice.toLocaleString('en-IN')}` : 'Unavailable'}
+                      </span>
                     </button>
                   </div>
+                  {formErrors.sharing && (
+                    <div className="mt-2 flex items-center gap-1.5 text-rose-500">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span className="text-xs font-medium leading-tight">{formErrors.sharing}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Passenger Selection */}

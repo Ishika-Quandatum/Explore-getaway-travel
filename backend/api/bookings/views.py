@@ -38,7 +38,27 @@ def bookings_list_create(request):
     if serializer.is_valid():
         package = serializer.validated_data['package']
         guests = serializer.validated_data.get('guests_count', 1)
-        total_price = package.price_per_person * guests
+        sharing_type = request.data.get('sharing_type', 'single')
+
+        # Validate sharing type price configuration
+        if sharing_type == 'triple' and (package.triple_sharing is None or package.triple_sharing <= 0):
+            return Response({'error': 'Triple sharing amount is not allocated for this package. Please select another sharing type'}, status=status.HTTP_400_BAD_REQUEST)
+        if sharing_type == 'double' and (package.double_sharing is None or package.double_sharing <= 0):
+            return Response({'error': 'Double sharing amount is not allocated for this package. Please select another sharing type'}, status=status.HTTP_400_BAD_REQUEST)
+        if sharing_type == 'single' and (package.price_per_person is None or package.price_per_person <= 0):
+            return Response({'error': 'Single sharing amount is not allocated for this package. Please select another sharing type'}, status=status.HTTP_400_BAD_REQUEST)
+
+        req_price = request.data.get('total_price')
+        if req_price is not None and float(req_price) > 0:
+            total_price = req_price
+        else:
+            unit_price = package.price_per_person
+            if sharing_type == 'double' and package.double_sharing:
+                unit_price = package.double_sharing
+            elif sharing_type == 'triple' and package.triple_sharing:
+                unit_price = package.triple_sharing
+            total_price = unit_price * guests
+
         booking = serializer.save(
             user=user,
             total_price=total_price,

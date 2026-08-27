@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { MapPin, Phone, Mail, Clock, Send, ChevronRight, MessageSquare, Users, Headphones } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Send, ChevronRight, MessageSquare, Users, Headphones, XCircle } from 'lucide-react';
 import heroImg from '../assets/hero-BTX8PeM0.jpg';
+import api from '../api/axios';
 
 const ContactPage = ({ onGoBack }) => {
   const [formData, setFormData] = useState({
@@ -11,16 +12,40 @@ const ContactPage = ({ onGoBack }) => {
     message: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 5000);
-    setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+    if (!formData.subject) {
+      setError("Please select a subject.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    setSubmitted(false);
+
+    try {
+      await api.post('contact/', {
+        full_name: formData.name,
+        email: formData.email,
+        phone_number: formData.phone,
+        subject: formData.subject,
+        message: formData.message
+      });
+      setSubmitted(true);
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+      setTimeout(() => setSubmitted(false), 5000);
+    } catch (err) {
+      console.error('Contact submission error:', err);
+      setError(err.response?.data?.error || 'Failed to send message. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -100,6 +125,13 @@ const ContactPage = ({ onGoBack }) => {
               </div>
             )}
 
+            {error && (
+              <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm font-medium flex items-center gap-2">
+                <XCircle className="w-4 h-4" />
+                {error}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
@@ -172,10 +204,11 @@ const ContactPage = ({ onGoBack }) => {
               </div>
               <button
                 type="submit"
-                className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold uppercase tracking-widest text-xs px-8 py-4 rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] flex items-center gap-2"
+                disabled={loading}
+                className="bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-900 font-extrabold uppercase tracking-widest text-xs px-8 py-4 rounded-xl transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] flex items-center gap-2"
               >
                 <Send className="w-4 h-4" />
-                Send Message
+                {loading ? 'Sending...' : 'Send Message'}
               </button>
             </form>
           </div>
