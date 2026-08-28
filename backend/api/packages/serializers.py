@@ -19,9 +19,9 @@ class TourPackageSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'title', 'slug', 'destination', 'destination_details',
             'category', 'category_details', 'duration_nights', 'duration_days',
-            'location_summary', 'price_per_person', 'double_sharing', 'triple_sharing', 'original_price', 'old_price', 'rating',
+            'location_summary', 'price_per_person', 'double_sharing', 'triple_sharing', 'child_price', 'original_price', 'old_price', 'rating',
             'reviews_count', 'badge_text', 'image_url', 'gallery',
-            'tour_overview', 'cancellation_policy', 'upcoming_departures', 'day_wise_itinerary',
+            'tour_overview', 'best_for', 'cancellation_policy', 'upcoming_departures', 'day_wise_itinerary',
             'highlights', 'inclusions', 'exclusions', 'is_bestseller', 'is_trending',
             'is_active', 'itinerary', 'created_at'
         )

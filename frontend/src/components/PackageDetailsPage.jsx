@@ -17,7 +17,7 @@ export default function PackageDetailsPage({
 }) {
   const [activeTab, setActiveTab] = useState('overview');
   const [expandedDays, setExpandedDays] = useState([1]); // Day 1 expanded by default
-  const [adults, setAdults] = useState(2);
+  const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
   const [sharingType, setSharingType] = useState('single'); // single, double, triple
   const [selectedDate, setSelectedDate] = useState('');
@@ -153,7 +153,11 @@ export default function PackageDetailsPage({
   };
   
   const currentPrice = getPriceBySharing();
-  const totalPrice = currentPrice * adults + (currentPrice * 0.7) * children;
+  const childPrice = (packageItem.child_price !== undefined && packageItem.child_price !== null && packageItem.child_price !== '' && Number(packageItem.child_price) > 0)
+    ? Number(packageItem.child_price)
+    : currentPrice * 0.7;
+
+  const totalPrice = (currentPrice * adults) + (childPrice * children);
   
   const originalPrice = packageItem.original_price ? Number(packageItem.original_price) : currentPrice * 1.25;
 
@@ -228,7 +232,7 @@ export default function PackageDetailsPage({
   return (
     <div className="bg-[#FAF7F5] min-h-screen pb-20">
       {/* Hero Banner Section */}
-      <div className="relative h-[450px] md:h-[550px] w-full">
+      <div className="relative h-[470px] w-full">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           <img 
@@ -298,7 +302,8 @@ export default function PackageDetailsPage({
             
             {/* Tour Overview */}
             <section>
-              <h2 className="text-3xl font-serif text-slate-900 mb-6">Tour Overview</h2>
+              <h2 className="text-3xl font-serif text-slate-900 mb-2">Tour Overview</h2>
+              <div className="w-20 h-0.5 bg-amber-500 mb-6"></div>
               <p className="text-slate-600 leading-relaxed mb-8">
                 {packageItem.tour_overview}
               </p>
@@ -316,7 +321,11 @@ export default function PackageDetailsPage({
                 <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
                   <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">Best For</p>
                   <p className="font-bold text-slate-900 truncate">
-                    {packageItem.highlights?.join(', ') || packageItem.category_details?.display_label || 'Everyone'}
+                    {
+                      (packageItem.best_for && packageItem.best_for.trim())
+                        ? packageItem.best_for
+                        : (packageItem.category_details?.name || packageItem.category_details?.display_label || (typeof packageItem.category === 'string' ? packageItem.category : packageItem.category?.name) || 'Group Tours')
+                    }
                   </p>
                 </div>
                 <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
@@ -331,7 +340,10 @@ export default function PackageDetailsPage({
             {/* Day-wise Itinerary */}
             <section>
               <div className="flex items-end justify-between mb-6">
-                <h2 className="text-3xl font-serif text-slate-900">Day-wise Itinerary</h2>
+                <div>
+                  <h2 className="text-3xl font-serif text-slate-900 mb-2">Day-wise Itinerary</h2>
+                  <div className="w-20 h-0.5 bg-amber-500"></div>
+                </div>
                 <div className="flex gap-2">
                   <button onClick={expandAll} className="px-3 py-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded hover:bg-slate-50 transition-colors">EXPAND ALL</button>
                   <button onClick={collapseAll} className="px-3 py-1.5 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded hover:bg-slate-50 transition-colors">COLLAPSE ALL</button>
@@ -502,7 +514,8 @@ export default function PackageDetailsPage({
             {/* Upcoming Departure Dates */}
             {packageItem.upcoming_departures?.length > 0 && (
               <section>
-                <h2 className="text-3xl font-serif text-slate-900 mb-6">Upcoming Departure Dates</h2>
+                <h2 className="text-3xl font-serif text-slate-900 mb-2">Upcoming Departure Dates</h2>
+                <div className="w-20 h-0.5 bg-amber-500 mb-6"></div>
                 <div className="flex flex-wrap gap-3">
                   {packageItem.upcoming_departures.map((date, idx) => (
                     <div key={idx} className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg shadow-sm">
@@ -517,7 +530,8 @@ export default function PackageDetailsPage({
             {/* Destination Gallery */}
             {getGalleryItems().length > 0 && (
               <section>
-                <h2 className="text-3xl font-serif text-slate-900 mb-6">Destination Gallery</h2>
+                <h2 className="text-3xl font-serif text-slate-900 mb-2">Destination Gallery</h2>
+                <div className="w-20 h-0.5 bg-amber-500 mb-6"></div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                   {getGalleryItems().map((item, idx) => (
                     <div key={idx} className="flex flex-col bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm group">
@@ -697,8 +711,8 @@ export default function PackageDetailsPage({
                   </div>
                   {children > 0 && (
                     <div className="flex justify-between text-sm text-slate-600">
-                      <span>{children} children x ₹{(currentPrice * 0.7).toLocaleString('en-IN')}</span>
-                      <span className="font-medium">₹{(children * currentPrice * 0.7).toLocaleString('en-IN')}</span>
+                      <span>{children} children x ₹{childPrice.toLocaleString('en-IN')}</span>
+                      <span className="font-medium">₹{(children * childPrice).toLocaleString('en-IN')}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-xs text-slate-500 italic mt-2">

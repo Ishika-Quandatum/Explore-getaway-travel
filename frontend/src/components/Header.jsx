@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Phone, Mail, User, LogOut, ShieldCheck, ShoppingBag, Menu, X, Heart } from 'lucide-react';
 
@@ -7,6 +7,19 @@ const Header = ({ onOpenAuth, activeSection, setActiveSection, currentView, setC
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const profileRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    if (profileDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [profileDropdownOpen]);
 
   const handleNavClick = (section, view = 'home') => {
     setCurrentView(view);
@@ -187,7 +200,7 @@ const Header = ({ onOpenAuth, activeSection, setActiveSection, currentView, setC
 
           {/* Right Action / Auth Buttons */}
           <div className="hidden md:flex items-center gap-3 relative ml-auto order-2 lg:order-3">
-            <div className="relative">
+            <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                 className="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center border border-slate-700 hover:border-amber-400 transition-all focus:outline-none overflow-hidden"

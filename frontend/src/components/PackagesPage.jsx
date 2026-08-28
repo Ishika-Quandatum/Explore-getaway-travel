@@ -200,9 +200,6 @@ const PackagesPage = ({
                 <span>{backButtonText}</span>
               </button>
             )}
-            <p className="text-amber-400 text-xs font-extrabold tracking-widest uppercase">
-              DESTINATION
-            </p>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-white font-normal tracking-tight">
               {activeDestObj.name}
             </h1>

@@ -39,6 +39,8 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
   const [pkgOldPrice, setPkgOldPrice] = useState('');
   const [pkgDoubleSharing, setPkgDoubleSharing] = useState('');
   const [pkgTripleSharing, setPkgTripleSharing] = useState('');
+  const [pkgChildPrice, setPkgChildPrice] = useState('');
+  const [pkgBestFor, setPkgBestFor] = useState('');
   const [pkgBadge, setPkgBadge] = useState('BEST SELLER');
   const [pkgRating, setPkgRating] = useState('');
   const [pkgImg, setPkgImg] = useState('');
@@ -361,6 +363,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
       { key: 'pkgNights', value: pkgNights, ref: 'pkg-nights' },
       { key: 'pkgDays', value: pkgDays, ref: 'pkg-days' },
       { key: 'pkgPrice', value: pkgPrice, ref: 'pkg-price' },
+      { key: 'pkgChildPrice', value: pkgChildPrice, ref: 'pkg-child-price' },
       { key: 'pkgLocation', value: pkgLocation, ref: 'pkg-location' },
       { key: 'pkgImg', value: pkgImg, ref: 'pkg-image' },
     ];
@@ -402,9 +405,11 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
       old_price: pkgOldPrice !== '' && pkgOldPrice !== null ? Number(pkgOldPrice) : null,
       double_sharing: pkgDoubleSharing !== '' && pkgDoubleSharing !== null ? Number(pkgDoubleSharing) : null,
       triple_sharing: pkgTripleSharing !== '' && pkgTripleSharing !== null ? Number(pkgTripleSharing) : null,
+      child_price: pkgChildPrice !== '' && pkgChildPrice !== null ? Number(pkgChildPrice) : 0,
       badge_text: pkgBadge,
       image_url: pkgImg,
       tour_overview: pkgOverview,
+      best_for: pkgBestFor,
       cancellation_policy: pkgCancellation,
       upcoming_departures: typeof pkgDepartures === 'string' ? pkgDepartures.split(',').map(s => s.trim()).filter(Boolean) : (Array.isArray(pkgDepartures) ? pkgDepartures : []),
       gallery: pkgGallery.map(item => ({ url: item.url, description: item.description || '' })),
@@ -471,12 +476,14 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     setPkgOldPrice('');
     setPkgDoubleSharing('');
     setPkgTripleSharing('');
+    setPkgChildPrice('');
     setPkgBadge('POPULAR');
     setPkgRating('');
     setPkgImg('');
     setPkgFileName('');
     setGalleryFileNames('');
     setPkgOverview('');
+    setPkgBestFor('');
     setPkgCancellation('');
     setPkgDepartures('');
     setPkgInclusions('');
@@ -508,10 +515,12 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
     setPkgOldPrice(pkg.old_price !== undefined && pkg.old_price !== null ? pkg.old_price : '');
     setPkgDoubleSharing(pkg.double_sharing !== undefined && pkg.double_sharing !== null ? pkg.double_sharing : '');
     setPkgTripleSharing(pkg.triple_sharing !== undefined && pkg.triple_sharing !== null ? pkg.triple_sharing : '');
+    setPkgChildPrice(pkg.child_price !== undefined && pkg.child_price !== null ? pkg.child_price : '');
     setPkgBadge(pkg.badge_text || 'POPULAR');
     setPkgRating(pkg.rating !== undefined && pkg.rating !== null ? pkg.rating : '');
     setPkgImg(pkg.image_url || '');
     setPkgOverview(pkg.tour_overview || '');
+    setPkgBestFor(pkg.best_for || '');
     setPkgCancellation(pkg.cancellation_policy || '');
     setPkgDepartures(Array.isArray(pkg.upcoming_departures) ? pkg.upcoming_departures.join(', ') : (pkg.upcoming_departures || ''));
     setPkgInclusions(Array.isArray(pkg.inclusions) ? pkg.inclusions.join(', ') : (pkg.inclusions || ''));
@@ -1991,8 +2000,7 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                 </div>
               </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="grid grid-cols-2 gap-3">
+               <div className="grid grid-cols-2 gap-3">
                   <div data-field="pkg-nights">
                     <label className="block text-slate-600 font-bold mb-1">Nights <span className="text-red-500">*</span></label>
                     <input
@@ -2016,11 +2024,13 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                     {pkgErrors.pkgDays && <p className="text-red-500 text-[11px] mt-1 font-medium">{pkgErrors.pkgDays}</p>}
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div data-field="pkg-price">
                     <label className="block text-slate-600 font-bold mb-1">Price / Person (₹) <span className="text-red-500">*</span></label>
                     <input
                       type="number"
+                      placeholder="e.g. 24999"
                       value={pkgPrice}
                       onChange={(e) => { setPkgPrice(e.target.value); setPkgErrors(prev => { const n = {...prev}; delete n.pkgPrice; return n; }); }}
                       className={`w-full px-3 py-2.5 rounded-xl bg-slate-50 border text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white ${pkgErrors.pkgPrice ? 'border-red-500' : 'border-slate-200'}`}
@@ -2031,14 +2041,24 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
                     <label className="block text-slate-600 font-bold mb-1">Old Price (Optional)</label>
                     <input
                       type="number"
-                      placeholder="e.g. 23999"
+                      placeholder="e.g. 39999"
                       value={pkgOldPrice}
                       onChange={(e) => setPkgOldPrice(e.target.value)}
                       className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white"
                     />
                   </div>
+                  <div data-field="pkg-child-price">
+                    <label className="block text-slate-600 font-bold mb-1">Child Price (₹) <span className="text-red-500">*</span></label>
+                    <input
+                      type="number"
+                      placeholder="e.g. 8000"
+                      value={pkgChildPrice}
+                      onChange={(e) => { setPkgChildPrice(e.target.value); setPkgErrors(prev => { const n = {...prev}; delete n.pkgChildPrice; return n; }); }}
+                      className={`w-full px-3 py-2.5 rounded-xl bg-slate-50 border text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white ${pkgErrors.pkgChildPrice ? 'border-red-500' : 'border-slate-200'}`}
+                    />
+                    {pkgErrors.pkgChildPrice && <p className="text-red-500 text-[11px] mt-1 font-medium">{pkgErrors.pkgChildPrice}</p>}
+                  </div>
                 </div>
-              </div>
 
               <div>
                 <label className="block text-slate-700 font-bold mb-2">Sharing Type</label>
@@ -2153,6 +2173,17 @@ const AdminPanel = ({ onGoHome, onRefreshData }) => {
               <div>
                 <label className="block text-slate-600 font-bold mb-1">Tour Overview</label>
                 <textarea rows="3" placeholder="Detailed overview..." value={pkgOverview} onChange={(e) => setPkgOverview(e.target.value)} className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-amber-500 focus:outline-none" />
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-bold mb-1">Best For (Optional)</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Couples, Families, Adventure Enthusiasts"
+                  value={pkgBestFor}
+                  onChange={(e) => setPkgBestFor(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:border-amber-500 focus:bg-white"
+                />
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

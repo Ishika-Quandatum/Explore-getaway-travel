@@ -115,14 +115,9 @@ const UserPanel = ({ onGoHome, onBrowsePackages, activeTab, setActiveTab, onSele
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <div className="flex items-center gap-2">
               <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
                 Welcome back, {user?.first_name || user?.username}!
               </h1>
-              <span className="px-3 py-1 rounded-full bg-sky-100 text-sky-800 text-[10px] font-extrabold uppercase tracking-wider">
-                USER PANEL
-              </span>
-            </div>
             <p className="text-xs text-slate-500 font-light mt-0.5">
               Manage your active tour bookings and travel profile details.
             </p>

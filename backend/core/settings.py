@@ -18,7 +18,7 @@ except ImportError:
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-explore-getaway-secret-key-2026-super-secure')
 
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 't')
 
 ALLOWED_HOSTS = ['*']
 
@@ -152,6 +152,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files (Uploaded images)
 MEDIA_URL = '/media/'
